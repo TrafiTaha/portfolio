@@ -11,8 +11,24 @@ export default function Footer() {
         <p className="text-gray-400 mb-4">Help fuel the next big project with your contribution</p>
         <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl p-4 border border-white/10 inline-block">
           <div className="text-center">
-            <div className="text-lg font-mono font-bold mb-1 text-cyan-300">29119181</div>
-            <div className="text-xs text-gray-400">D17 Account</div>
+            <motion.div
+              className="text-lg font-mono font-bold mb-1 text-cyan-300"
+              animate={{
+                textShadow: [
+                  '0 0 5px #00ffff',
+                  '0 0 20px #00ffff, 0 0 30px #00ffff',
+                  '0 0 5px #00ffff',
+                ],
+              }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+            >
+              D17: 29119181
+            </motion.div>
+            <div className="text-xs text-gray-400">System Serial Number</div>
           </div>
         </div>
       </div>

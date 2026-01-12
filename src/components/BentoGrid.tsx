@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Code, Server, Languages, Wrench, Github, ExternalLink } from 'lucide-react';
+import SkillsVisualization from '@/components/SkillsVisualization';
 
 const Card = ({ children, secondaryContent, delay = 0, noTilt = false }: { children: React.ReactNode; secondaryContent?: React.ReactNode; delay?: number; noTilt?: boolean }) => {
   const [isFlipped, setIsFlipped] = useState(false);
@@ -160,7 +161,12 @@ class WorkflowAutomation
       variants={containerVariants}
       initial="hidden"
       animate="visible"
+      id="projects"
     >
+      <div className="text-center mb-12">
+        <div className="text-sm font-mono text-cyan-400 mb-2">SECTION_02</div>
+        <h2 className="text-3xl font-bold gradient-text">Project Portfolio</h2>
+      </div>
       <div className="max-w-7xl mx-auto px-8">
         <div className="grid grid-cols-12 gap-6 grid-auto-rows-1fr">
           {/* Row 1: 3 equal cards */}
@@ -243,43 +249,15 @@ class WorkflowAutomation
             </Card>
           </motion.div>
           <motion.div className="col-span-4 h-full" variants={containerVariants}>
-            <Card
-              secondaryContent={
-                <div className="text-center">
-                  <h4 className="text-xl font-bold mb-4">Optimization Stats</h4>
-                  <div className="space-y-2">
-                    <div className="text-purple-400">Algorithm Efficiency: 95%</div>
-                    <div className="text-cyan-400">Memory Usage: Optimized</div>
-                    <div className="text-green-400">Code Quality: A+</div>
-                  </div>
-                </div>
-              }
-            >
+            <Card noTilt={true}>
               <div className="flex items-center mb-4">
                 <Languages className="w-8 h-8 text-purple-400 mr-3" />
-                <h3 className="text-xl font-semibold">Languages</h3>
+                <h3 className="text-xl font-semibold">Skills Matrix</h3>
               </div>
               <div className="flex-grow">
-                <div className="mb-3">
-                  <div className="flex justify-between">
-                    <span className="text-lg">PHP & Blade</span>
-                    <span className="text-sm text-gray-400">15k+ LOC</span>
-                  </div>
-                </div>
-                <div className="mb-3">
-                  <div className="flex justify-between">
-                    <span className="text-lg">JavaScript/TypeScript</span>
-                    <span className="text-sm text-gray-400">8 Projects</span>
-                  </div>
-                </div>
-                <div className="mb-3">
-                  <div className="flex justify-between">
-                    <span className="text-lg">C</span>
-                    <span className="text-sm text-gray-400">Algorithm Focus</span>
-                  </div>
-                </div>
+                <SkillsVisualization />
               </div>
-              <p className="text-gray-500 text-sm">Clean, maintainable code focusing on Algorithm Optimization</p>
+              <p className="text-gray-500 text-sm">3D Interactive Skills Cloud - Expertise levels visualized</p>
             </Card>
           </motion.div>
 

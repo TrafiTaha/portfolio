@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   description: "Engineering digital tools that simplify human complexity. Software Engineer specializing in High-Impact Mobile & Web Applications.",
 };
 
+import CanvasCursor from "@/components/ui/CanvasCursor";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -27,6 +29,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white`}
       >
+        <CanvasCursor />
         {children}
       </body>
     </html>

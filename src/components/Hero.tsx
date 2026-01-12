@@ -11,7 +11,9 @@ export default function Hero() {
       animate={{ opacity: 1, scaleX: 1 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
       className="text-center py-20 flex flex-col items-center"
+      id="hero"
     >
+      <div className="text-sm font-mono text-cyan-400 mb-4">SECTION_01</div>
       <div className="flex items-center justify-center mb-12 space-x-12">
         {/* Portrait with Neon Hex Border and Rotating Tech Ring */}
         <motion.div
@@ -88,9 +90,9 @@ export default function Hero() {
         initial={{ opacity: 0, scaleX: 0.9 }}
         animate={{ opacity: 1, scaleX: 1 }}
         transition={{ delay: 0.2, duration: 0.7 }}
-        className="text-4xl md:text-6xl font-bold gradient-text mb-8"
+        className="text-4xl md:text-6xl font-bold gradient-text mb-8 font-serif"
       >
-        Architecting the future of Language Learning.
+        Pure Extraction
       </motion.h1>
 
       <motion.p
