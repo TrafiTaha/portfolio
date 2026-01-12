@@ -57,7 +57,7 @@ export default function ProjectGallery({ isWindowMode = false }: { isWindowMode?
                         className="flex-shrink-0 w-[300px] h-full glass-panel rounded-2xl p-6 flex flex-col justify-between snap-center group relative overflow-hidden"
                     >
                         {/* Background Gradient Blob */}
-                        <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${project.color} blur-[60px] opacity-20 group-hover:opacity-40 transition-opacity`} />
+                        <div title="Project Background" className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${project.color} blur-[60px] opacity-20 group-hover:opacity-40 transition-opacity`} />
 
                         <div>
                             <span className="text-xs font-mono text-cyber-lime mb-2 block">{project.category}</span>

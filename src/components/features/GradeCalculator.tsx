@@ -29,7 +29,7 @@ export default function GradeCalculator() {
     return (
         <div className="w-full h-full p-6 flex flex-col justify-between relative group">
             <div className="absolute top-0 right-0 p-6 opacity-50 group-hover:opacity-100 transition-opacity">
-                <button onClick={reset} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                <button onClick={reset} aria-label="Reset Calculator" className="p-2 hover:bg-white/10 rounded-full transition-colors">
                     <RotateCcw size={14} className="text-gray-400 hover:text-white" />
                 </button>
             </div>
