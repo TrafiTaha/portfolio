@@ -1,44 +1,52 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
+import { useEffect } from "react";
 import Lenis from "lenis";
-import 'lenis/dist/lenis.css';
-import DesktopEnvironment from "@/components/layout/DesktopEnvironment";
+import "lenis/dist/lenis.css";
+import Navbar from "@/components/layout/Navbar";
+import Hero from "@/components/sections/Hero";
+import About from "@/components/sections/About";
+
+// Below-the-fold sections are lazy-loaded to keep first paint light
+const Skills = dynamic(() => import("@/components/sections/Skills"));
+const Projects = dynamic(() => import("@/components/sections/Projects"));
+const GitHubActivity = dynamic(() => import("@/components/sections/GitHubActivity"));
+const Contact = dynamic(() => import("@/components/sections/Contact"));
 
 export default function Home() {
-  const lenisRef = useRef<Lenis | null>(null);
-
   useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: 'vertical',
-      gestureOrientation: 'vertical',
       smoothWheel: true,
     });
-    lenisRef.current = lenis;
 
-    function raf(time: number) {
+    let rafId: number;
+    const raf = (time: number) => {
       lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    requestAnimationFrame(raf);
+      rafId = requestAnimationFrame(raf);
+    };
+    rafId = requestAnimationFrame(raf);
 
     return () => {
+      cancelAnimationFrame(rafId);
       lenis.destroy();
     };
   }, []);
 
   return (
-    <main className="min-h-screen w-full bg-[#050505] text-white flex flex-col items-center relative selection:bg-cyber-lime selection:text-black bg-grid-pattern">
-      {/* Background Ambient Glows */}
-      <div className="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] bg-purple-900/10 blur-[120px] rounded-full pointer-events-none z-0" />
-      <div className="fixed bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-blue-900/10 blur-[120px] rounded-full pointer-events-none z-0" />
-
-      <div className="z-10 w-full">
-        <DesktopEnvironment />
-      </div>
+    <main className="min-h-svh w-full relative">
+      <div className="site-backdrop" aria-hidden />
+      <Navbar />
+      <Hero />
+      <About />
+      <Skills />
+      <Projects />
+      <GitHubActivity />
+      <Contact />
     </main>
   );
 }

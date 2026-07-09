@@ -44,6 +44,7 @@ export default function D17Vault() {
     const handleCopy = () => {
         navigator.clipboard.writeText(target);
         setCopied(true);
+        window.dispatchEvent(new CustomEvent("terminal-output", { detail: { message: `PROTOCOL_COPIED: NODE_${target}_LINKED` } }));
         setTimeout(() => setCopied(false), 2000);
     };
 

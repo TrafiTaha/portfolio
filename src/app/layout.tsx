@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { personal, SITE_URL } from "@/data/portfolio";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -12,12 +13,68 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const title = `${personal.name} | Software Engineer — Mobile & Web`;
+const description =
+  "Engineering digital tools that simplify human complexity. Taha Ben Romdhane is a software engineer in Tunis, Tunisia building high-impact web platforms and mobile applications with React, Next.js, Laravel and Node.js.";
+
 export const metadata: Metadata = {
-  title: "Taha Ben Romdhane - Software Engineer",
-  description: "Engineering digital tools that simplify human complexity. Software Engineer specializing in High-Impact Mobile & Web Applications.",
+  metadataBase: new URL(SITE_URL),
+  title,
+  description,
+  keywords: [
+    "Taha Ben Romdhane",
+    "Software Engineer Tunisia",
+    "Full Stack Developer Tunis",
+    "React developer",
+    "Next.js developer",
+    "Laravel developer",
+    "Mobile app developer Tunisia",
+  ],
+  authors: [{ name: personal.name, url: SITE_URL }],
+  creator: personal.name,
+  robots: { index: true, follow: true },
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    url: SITE_URL,
+    title,
+    description,
+    siteName: `${personal.name} Portfolio`,
+    locale: "en_US",
+    images: [{ url: personal.image, width: 1200, height: 1500, alt: personal.name }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+    images: [personal.image],
+  },
 };
 
-import CanvasCursor from "@/components/ui/CanvasCursor";
+const personJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: personal.name,
+  url: SITE_URL,
+  image: `${SITE_URL}${personal.image}`,
+  jobTitle: personal.role,
+  description,
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Tunis",
+    addressCountry: "TN",
+  },
+  sameAs: [personal.github, personal.linkedin],
+  knowsAbout: [
+    "React.js",
+    "Next.js",
+    "TypeScript",
+    "Laravel",
+    "Node.js",
+    "Mobile Application Development",
+    "Full Stack Development",
+  ],
+};
 
 export default function RootLayout({
   children,
@@ -26,10 +83,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white`}
-      >
-        <CanvasCursor />
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+        />
         {children}
       </body>
     </html>

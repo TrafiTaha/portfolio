@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Archived pre-redesign components, kept for reference only.
+    "legacy/**",
   ]),
 ]);
 

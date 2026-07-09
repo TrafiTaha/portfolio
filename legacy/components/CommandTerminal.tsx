@@ -30,56 +30,55 @@ export default function CommandTerminal() {
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    const handleOutput = (e: any) => {
+      setHistory(prev => [...prev, e.detail.message]);
+    };
+    window.addEventListener("terminal-output", handleOutput);
+    return () => window.removeEventListener("terminal-output", handleOutput);
+  }, []);
+
   const executeCommand = (cmd: string) => {
     const newHistory = [...history, `> ${cmd}`];
 
     switch (cmd.toLowerCase()) {
       case 'help':
-        newHistory.push('Available commands:');
-        newHistory.push('  cd /projects - Navigate to projects');
-        newHistory.push('  cat about.txt - View about section');
-        newHistory.push('  exec hire - Execute hiring process');
-        newHistory.push('  ls - List sections');
-        newHistory.push('  intensity low|normal|high - Set Absolute Zero intensity');
-        newHistory.push('  clear - Clear terminal');
+        newHistory.push('VANGUARD_OS v4.0.1 - CORE_COMMANDS:');
+        newHistory.push('  cd /projects      - Navigate to flagship modules');
+        newHistory.push('  cd /vault         - Enter financial node');
+        newHistory.push('  sudo connect      - Execute mail protocol');
+        newHistory.push('  ls                - List active system nodes');
+        newHistory.push('  chaos --toggle    - Trigger system instability');
+        newHistory.push('  clear             - Flush terminal buffer');
         break;
       case 'cd /projects':
-        newHistory.push('Navigating to projects...');
-        // Scroll to projects section
-        document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' });
+        newHistory.push('ACCESSING_MODULE_GRID...');
+        document.querySelector('[data-bento-grid]')?.scrollIntoView({ behavior: 'smooth' });
         break;
-      case 'cat about.txt':
-        newHistory.push('Loading about information...');
-        document.getElementById('hero')?.scrollIntoView({ behavior: 'smooth' });
+      case 'cd /vault':
+        newHistory.push('DECRYPTING_FINANCIAL_NODE...');
+        document.getElementById('financial-vault')?.scrollIntoView({ behavior: 'smooth' });
         break;
-      case 'exec hire':
-        newHistory.push('Initiating contact protocol...');
-        window.open('mailto:your.email@example.com?subject=Hiring Inquiry', '_blank');
+      case 'sudo connect':
+        newHistory.push('INITIATING_SECURE_MAIL_LINK...');
+        window.open('mailto:contact@taha.dev', '_blank');
+        break;
+      case 'chaos --toggle':
+        newHistory.push('CHAOS_PROTOCOL_INITIALIZED');
+        window.dispatchEvent(new CustomEvent("chaos-mode", { detail: { active: true } }));
         break;
       case 'ls':
-        newHistory.push('Available sections:');
-        newHistory.push('  hero/');
-        newHistory.push('  projects/');
-        newHistory.push('  skills/');
-        newHistory.push('  contact/');
-        break;
-      case 'intensity low':
-        setIntensity('low');
-        newHistory.push('Absolute Zero intensity set to LOW');
-        break;
-      case 'intensity normal':
-        setIntensity('normal');
-        newHistory.push('Absolute Zero intensity set to NORMAL');
-        break;
-      case 'intensity high':
-        setIntensity('high');
-        newHistory.push('Absolute Zero intensity set to HIGH');
+        newHistory.push('ACTIVE_NODES:');
+        newHistory.push('  /home [SECURE]');
+        newHistory.push('  /projects [DEPLOYED]');
+        newHistory.push('  /vault [ENCRYPTED]');
+        newHistory.push('  /terminal [ALIVE]');
         break;
       case 'clear':
         setHistory([]);
         return;
       default:
-        newHistory.push(`Command not found: ${cmd}`);
+        newHistory.push(`ERR: Command '${cmd}' not recognized in current session.`);
     }
 
     setHistory(newHistory);
@@ -126,6 +125,7 @@ export default function CommandTerminal() {
               <button
                 onClick={() => setIsOpen(false)}
                 className="text-gray-400 hover:text-white transition-colors"
+                title="Terminate Session"
               >
                 <X className="w-5 h-5" />
               </button>
