@@ -64,7 +64,7 @@ const personJsonLd = {
     addressLocality: "Tunis",
     addressCountry: "TN",
   },
-  sameAs: [personal.github, personal.linkedin],
+  sameAs: [personal.github, personal.linkedin, personal.facebook, personal.instagram, personal.whatsapp],
   knowsAbout: [
     "React.js",
     "Next.js",

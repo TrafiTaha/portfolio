@@ -13,6 +13,10 @@ export const personal = {
   github: "https://github.com/TrafiTaha",
   githubUser: "TrafiTaha",
   linkedin: "https://www.linkedin.com/in/taha-ben-romdhane-765b09371",
+  facebook: "https://www.facebook.com/share/14i4KyFYUsi/",
+  instagram: "https://www.instagram.com/txha_br?igsh=MWFvNXpjazJwdGZtMw==",
+  whatsapp: "https://wa.me/21629119181",
+  whatsappNumber: "+216 29119181",
 };
 
 export const aboutTags = [

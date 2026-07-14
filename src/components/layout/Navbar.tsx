@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Github, Linkedin } from "lucide-react";
+import { Github, Linkedin, Facebook, Instagram } from "lucide-react";
 import { useEffect, useState } from "react";
 import { personal } from "@/data/portfolio";
 
@@ -88,6 +88,24 @@ export default function Navbar() {
             className="p-2 text-zinc-400 hover:text-zinc-100 transition-colors"
           >
             <Linkedin size={16} />
+          </a>
+          <a
+            href={personal.facebook}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Facebook profile"
+            className="p-2 text-zinc-400 hover:text-zinc-100 transition-colors"
+          >
+            <Facebook size={16} />
+          </a>
+          <a
+            href={personal.instagram}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram profile"
+            className="p-2 text-zinc-400 hover:text-zinc-100 transition-colors"
+          >
+            <Instagram size={16} />
           </a>
         </div>
       </nav>

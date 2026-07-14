@@ -7,6 +7,9 @@ import { personal } from "@/data/portfolio";
 const socials = [
   { label: "GitHub", href: personal.github },
   { label: "LinkedIn", href: personal.linkedin },
+  { label: "Facebook", href: personal.facebook },
+  { label: "Instagram", href: personal.instagram },
+  { label: "WhatsApp", href: personal.whatsapp },
 ];
 
 export default function Contact() {
