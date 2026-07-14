@@ -44,6 +44,8 @@ export const skills: Skill[] = [
   { name: "GitHub Actions", short: "CI/CD", color: "#a78bfa" },
   { name: "DevOps", short: "DevOps", color: "#a855f7" },
   { name: "Artificial Intelligence", short: "AI", color: "#3b82f6" },
+  { name: "Angular", short: "Angular", color: "#dd0031" },
+  { name: "MongoDB", short: "MongoDB", color: "#47a248" },
 ];
 
 export type Certificate = {
