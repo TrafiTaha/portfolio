@@ -9,7 +9,7 @@ export const personal = {
   summary:
     "Engineering digital tools that simplify human complexity. I design and build performant web platforms and mobile experiences end-to-end — from database schema to pixel.",
   location: "Tunis, Tunisia",
-  image: "/myimage.png",
+  image: "/myimage-v2.jpg",
   github: "https://github.com/TrafiTaha",
   githubUser: "TrafiTaha",
   linkedin: "https://www.linkedin.com/in/taha-ben-romdhane-765b09371",
@@ -42,6 +42,8 @@ export const skills: Skill[] = [
   { name: "REST APIs", short: "REST", color: "#22c55e" },
   { name: "Git", short: "Git", color: "#f05033" },
   { name: "GitHub Actions", short: "CI/CD", color: "#a78bfa" },
+  { name: "DevOps", short: "DevOps", color: "#a855f7" },
+  { name: "Artificial Intelligence", short: "AI", color: "#3b82f6" },
 ];
 
 export type Certificate = {
