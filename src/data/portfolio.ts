@@ -78,6 +78,14 @@ export const certificates: Certificate[] = [
     image: "/certificates/ai-recommendation-9antra.png",
     color: "#3b82f6",
   },
+  {
+    title: "AITD Participation",
+    issuer: "ISET Sidi Bouzid",
+    duration: "1 Day",
+    date: "December 2025",
+    image: "/certificates/aitd-iset.png",
+    color: "#1e3a8a",
+  },
 ];
 
 export type Project = {
