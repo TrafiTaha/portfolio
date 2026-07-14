@@ -8,6 +8,7 @@ import { personal } from "@/data/portfolio";
 const links = [
   { label: "About", id: "about" },
   { label: "Skills", id: "skills" },
+  { label: "Certs", id: "certificates" },
   { label: "Work", id: "projects" },
   { label: "GitHub", id: "github" },
   { label: "Contact", id: "contact" },

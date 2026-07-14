@@ -26,7 +26,7 @@ export const aboutTags = [
 
 export type Skill = { name: string; short: string; color: string };
 
-// short: label stamped on the 3D ball, color: brand-ish tone
+// short: abbreviation label, color: brand-ish tone
 export const skills: Skill[] = [
   { name: "React", short: "React", color: "#61dafb" },
   { name: "Next.js", short: "Next", color: "#ffffff" },
@@ -42,6 +42,34 @@ export const skills: Skill[] = [
   { name: "REST APIs", short: "REST", color: "#22c55e" },
   { name: "Git", short: "Git", color: "#f05033" },
   { name: "GitHub Actions", short: "CI/CD", color: "#a78bfa" },
+];
+
+export type Certificate = {
+  title: string;
+  issuer: string;
+  duration: string;
+  date: string;
+  image: string;
+  color: string;
+};
+
+export const certificates: Certificate[] = [
+  {
+    title: "DevOps",
+    issuer: "9antra — The Bridge",
+    duration: "2 Months",
+    date: "March 2026",
+    image: "/certificates/devops-9antra.png",
+    color: "#a855f7",
+  },
+  {
+    title: "AI — Recommendation System",
+    issuer: "9antra — The Bridge",
+    duration: "1 Month",
+    date: "May 2026",
+    image: "/certificates/ai-recommendation-9antra.png",
+    color: "#3b82f6",
+  },
 ];
 
 export type Project = {

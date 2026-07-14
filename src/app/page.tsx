@@ -10,6 +10,7 @@ import About from "@/components/sections/About";
 
 // Below-the-fold sections are lazy-loaded to keep first paint light
 const Skills = dynamic(() => import("@/components/sections/Skills"));
+const Certificates = dynamic(() => import("@/components/sections/Certificates"));
 const Projects = dynamic(() => import("@/components/sections/Projects"));
 const GitHubActivity = dynamic(() => import("@/components/sections/GitHubActivity"));
 const Contact = dynamic(() => import("@/components/sections/Contact"));
@@ -44,6 +45,7 @@ export default function Home() {
       <Hero />
       <About />
       <Skills />
+      <Certificates />
       <Projects />
       <GitHubActivity />
       <Contact />
