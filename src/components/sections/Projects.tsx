@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Github } from "lucide-react";
+import Magnetic from "@/components/ui/Magnetic";
 import Section from "@/components/ui/Section";
 import ScrambleText from "@/components/ui/ScrambleText";
 import TiltCard from "@/components/ui/TiltCard";
@@ -10,14 +11,14 @@ import { projects, type Project } from "@/data/portfolio";
 function ProjectCover({ project }: { project: Project }) {
   return (
     <div
-      className="relative w-full h-full overflow-hidden"
+      className="relative w-full h-full overflow-hidden transition-transform duration-[1200ms] ease-out group-hover:scale-[1.04]"
       style={{
         background: `radial-gradient(120% 120% at 15% 10%, ${project.accent}26 0%, transparent 45%), radial-gradient(120% 130% at 90% 90%, ${project.accent2}33 0%, transparent 55%), #09090b`,
       }}
     >
-      {/* grid lines */}
+      {/* grid lines — brighten on hover */}
       <div
-        className="absolute inset-0 opacity-[0.13]"
+        className="absolute inset-0 opacity-[0.13] transition-opacity duration-700 group-hover:opacity-25"
         style={{
           backgroundImage:
             "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
@@ -27,9 +28,9 @@ function ProjectCover({ project }: { project: Project }) {
         }}
         aria-hidden
       />
-      {/* giant monogram */}
+      {/* giant monogram — drifts up on hover */}
       <span
-        className="absolute -bottom-8 -right-2 text-[11rem] md:text-[13rem] font-black leading-none select-none tracking-tighter"
+        className="absolute -bottom-8 -right-2 text-[11rem] md:text-[13rem] font-black leading-none select-none tracking-tighter transition-transform duration-1000 ease-out group-hover:-translate-y-4 group-hover:-translate-x-2"
         style={{ color: `${project.accent}1f`, WebkitTextStroke: `1px ${project.accent}40` }}
         aria-hidden
       >
@@ -46,10 +47,16 @@ function ProjectCover({ project }: { project: Project }) {
         </div>
         <div>
           <p className="text-2xl md:text-3xl font-black tracking-tight text-zinc-100">{project.title}</p>
-          <div className="mt-3 h-px w-full" style={{ background: `linear-gradient(90deg, ${project.accent}80, transparent)` }} />
+          <div
+            className="mt-3 h-px w-full origin-left scale-x-50 transition-transform duration-700 ease-out group-hover:scale-x-100"
+            style={{ background: `linear-gradient(90deg, ${project.accent}80, transparent)` }}
+          />
           <ul className="mt-3 space-y-1">
             {project.features.slice(0, 2).map((f) => (
-              <li key={f} className="text-[11px] md:text-xs text-zinc-500 font-mono truncate">
+              <li
+                key={f}
+                className="text-[11px] md:text-xs text-zinc-500 font-mono truncate transition-colors duration-500 group-hover:text-zinc-400"
+              >
                 <span style={{ color: project.accent }}>▸</span> {f}
               </li>
             ))}
@@ -62,7 +69,7 @@ function ProjectCover({ project }: { project: Project }) {
 
 export default function Projects() {
   return (
-    <Section id="projects" title="My Work" subtitle="Featured projects">
+    <Section id="projects" title="My Work" subtitle="Featured projects" index="04">
       <div className="w-full mx-auto mt-4 md:mt-8 flex flex-col gap-16 md:gap-24">
         {projects.map((project, i) => (
           <motion.article
@@ -110,16 +117,18 @@ export default function Projects() {
                 </div>
 
                 <div className="flex items-center gap-3 mt-6 md:mt-8">
-                  <a
-                    href={project.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`${project.title} on GitHub`}
-                    className="inline-flex items-center gap-2 text-sm font-semibold text-zinc-300 hover:text-cyber-lime transition-colors px-4 py-2 rounded-full border border-zinc-800 hover:border-cyber-lime/40 hover:bg-green-950/20"
-                  >
-                    <Github size={16} />
-                    View source
-                  </a>
+                  <Magnetic strength={0.3}>
+                    <a
+                      href={project.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${project.title} on GitHub`}
+                      className="inline-flex items-center gap-2 text-sm font-semibold text-zinc-300 hover:text-cyber-lime transition-colors px-4 py-2 rounded-full border border-zinc-800 hover:border-cyber-lime/40 hover:bg-green-950/20"
+                    >
+                      <Github size={16} />
+                      View source
+                    </a>
+                  </Magnetic>
                 </div>
               </div>
             </div>

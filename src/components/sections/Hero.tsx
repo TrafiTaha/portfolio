@@ -1,9 +1,11 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { ArrowDown, MapPin } from "lucide-react";
 import Image from "next/image";
+import Magnetic from "@/components/ui/Magnetic";
 import TiltCard from "@/components/ui/TiltCard";
+import { scrollToTarget } from "@/components/providers/SmoothScroll";
 import { personal } from "@/data/portfolio";
 
 const lineReveal = {
@@ -16,17 +18,30 @@ const lineReveal = {
 
 export default function Hero() {
   const reduceMotion = useReducedMotion();
+  const { scrollY } = useScroll();
+  const parallaxY = useTransform(scrollY, [0, 800], [0, 90]);
+  const portraitY = reduceMotion ? undefined : parallaxY;
+
+  // Fly-past exit: as you scroll into the page, the hero scales toward the
+  // camera and fades, like the first plane of a 3D space passing behind you.
+  const exitScale = useTransform(scrollY, [0, 800], [1, 1.16]);
+  const exitOpacity = useTransform(scrollY, [0, 560, 800], [1, 0.25, 0]);
 
   const scrollToProjects = (e: React.MouseEvent) => {
     e.preventDefault();
-    const el = document.getElementById("projects");
-    if (!el) return;
-    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 70, behavior: "smooth" });
+    scrollToTarget("#projects", -70);
   };
 
   return (
     <section id="home" className="relative min-h-svh w-full max-w-[86rem] mx-auto flex flex-col justify-center px-5 md:px-16 lg:px-20 pt-24 pb-16 overflow-hidden">
-      <div className="flex flex-col-reverse lg:flex-row items-center gap-12 lg:gap-8">
+      <motion.div
+        className="flex flex-col-reverse lg:flex-row items-center gap-12 lg:gap-8"
+        style={
+          reduceMotion
+            ? undefined
+            : { scale: exitScale, opacity: exitOpacity, transformPerspective: 1200, willChange: "transform, opacity" }
+        }
+      >
         {/* Text block */}
         <div className="w-full lg:w-3/5 flex flex-col items-start">
           <motion.p
@@ -70,14 +85,16 @@ export default function Hero() {
             transition={{ duration: 0.8, delay: 1.1 }}
             className="flex flex-wrap items-center gap-5 mt-10"
           >
-            <a
-              href="#projects"
-              onClick={scrollToProjects}
-              className="group inline-flex items-center gap-2 rounded-full bg-zinc-100 text-zinc-950 font-bold text-sm px-6 py-3 hover:bg-cyber-lime transition-colors duration-300"
-            >
-              View my work
-              <ArrowDown size={16} className="group-hover:translate-y-0.5 transition-transform" />
-            </a>
+            <Magnetic>
+              <a
+                href="#projects"
+                onClick={scrollToProjects}
+                className="group inline-flex items-center gap-2 rounded-full bg-zinc-100 text-zinc-950 font-bold text-sm px-6 py-3 hover:bg-cyber-lime transition-colors duration-300"
+              >
+                View my work
+                <ArrowDown size={16} className="group-hover:translate-y-0.5 transition-transform" />
+              </a>
+            </Magnetic>
             <span className="inline-flex items-center gap-1.5 font-mono text-xs tracking-widest text-zinc-500 uppercase">
               <MapPin size={13} className="text-cyber-lime" />
               {personal.location}
@@ -90,6 +107,7 @@ export default function Hero() {
           initial={{ opacity: 0, scale: 0.92 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1, ease: [0.76, 0, 0.24, 1], delay: 0.5 }}
+          style={{ y: portraitY }}
           className="w-full lg:w-2/5 flex justify-center"
         >
           <TiltCard className="relative w-56 sm:w-72 lg:w-96">
@@ -121,7 +139,7 @@ export default function Hero() {
             </div>
           </TiltCard>
         </motion.div>
-      </div>
+      </motion.div>
 
       {/* Scroll cue */}
       <motion.div

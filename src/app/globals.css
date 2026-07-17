@@ -7,10 +7,7 @@
 }
 
 @layer base {
-  html {
-    scroll-behavior: smooth;
-  }
-
+  /* No CSS scroll-behavior here: Lenis owns scrolling, and the two conflict. */
   body {
     @apply bg-zinc-950 text-zinc-100 antialiased;
     font-family: var(--font-geist-sans), sans-serif;
@@ -24,10 +21,11 @@
   }
 }
 
-/* Subtle ambient background: faint grid + top glow */
+/* The "world" layer: grid field the camera travels through.
+   Overscanned (negative inset) so scroll-zoom and mouse tilt never expose edges. */
 .site-backdrop {
   position: fixed;
-  inset: 0;
+  inset: -6%;
   z-index: -1;
   pointer-events: none;
   background:
@@ -65,11 +63,35 @@
   background: #22c55e;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
+/* Custom cursor: hide the native one while ours is mounted */
+.custom-cursor-active,
+.custom-cursor-active * {
+  cursor: none !important;
+}
 
+/* Visible keyboard focus (the custom cursor never suppresses this) */
+:focus-visible {
+  outline: 2px solid #22c55e;
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Infinite marquee — the track holds two identical rows, shift by one row */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 24s linear infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {

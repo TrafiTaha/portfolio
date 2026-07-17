@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { ArrowUpRight, BookMarked, GitFork, Star, Users } from "lucide-react";
 import { useEffect, useState } from "react";
+import Magnetic from "@/components/ui/Magnetic";
 import Section from "@/components/ui/Section";
 import { personal } from "@/data/portfolio";
 
@@ -82,7 +83,7 @@ export default function GitHubActivity() {
     : [];
 
   return (
-    <Section id="github" title="GitHub" subtitle="Live from the source — real repositories, real commits">
+    <Section id="github" title="GitHub" subtitle="Live from the source — real repositories, real commits" index="05">
       {failed ? (
         <p className="text-sm text-zinc-500 font-mono">
           Could not reach the GitHub API right now —{" "}
@@ -181,15 +182,17 @@ export default function GitHubActivity() {
             })}
           </div>
 
-          <a
-            href={personal.github}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group inline-flex items-center gap-2 text-sm font-semibold text-zinc-400 hover:text-cyber-lime transition-colors w-fit"
-          >
-            All repositories
-            <ArrowUpRight size={15} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-          </a>
+          <Magnetic strength={0.3} className="w-fit">
+            <a
+              href={personal.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-2 text-sm font-semibold text-zinc-400 hover:text-cyber-lime transition-colors w-fit"
+            >
+              All repositories
+              <ArrowUpRight size={15} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </a>
+          </Magnetic>
         </div>
       )}
     </Section>

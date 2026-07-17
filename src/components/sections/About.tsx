@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Section from "@/components/ui/Section";
-import { aboutTags, personal } from "@/data/portfolio";
+import { aboutTags, certificates, personal, projects, skills } from "@/data/portfolio";
 
 const container = {
   visible: { transition: { staggerChildren: 0.2 } },
@@ -18,9 +18,16 @@ const fadeUp = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" as const } },
 };
 
+const stats = [
+  { value: String(projects.length), suffix: "", label: "featured projects", aside: "*built to ship, not to demo" },
+  { value: String(skills.length), suffix: "+", label: "technologies", aside: "*and counting, every week" },
+  { value: String(certificates.length), suffix: "", label: "certifications", aside: "*from DevOps to AI" },
+  { value: "1", suffix: "", label: "mission", aside: "*simplify human complexity" },
+];
+
 export default function About() {
   return (
-    <Section id="about" title="About Me" subtitle="Get to know me" className="min-h-[70svh] flex flex-col justify-center">
+    <Section id="about" title="About Me" subtitle="Get to know me" index="01" className="min-h-[70svh] flex flex-col justify-center">
       <motion.div
         initial="hidden"
         whileInView="visible"
@@ -57,6 +64,29 @@ export default function About() {
           ))}
         </motion.div>
       </motion.div>
+
+      {/* Stats — big numbers with small honest asides */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-zinc-800/60 border border-zinc-800/60 rounded-2xl overflow-hidden mt-14 md:mt-20">
+        {stats.map((stat, i) => (
+          <motion.div
+            key={stat.label}
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.7, delay: i * 0.08, ease: [0.76, 0, 0.24, 1] }}
+            className="bg-zinc-950 p-6 md:p-8 flex flex-col"
+          >
+            <span className="text-4xl md:text-6xl font-black tracking-tighter text-zinc-100 leading-none">
+              {stat.value}
+              <span className="text-cyber-lime">{stat.suffix}</span>
+            </span>
+            <span className="text-xs md:text-sm font-semibold text-zinc-300 uppercase tracking-widest mt-3">
+              {stat.label}
+            </span>
+            <span className="font-mono text-[10px] md:text-xs text-zinc-600 mt-1.5">{stat.aside}</span>
+          </motion.div>
+        ))}
+      </div>
     </Section>
   );
 }

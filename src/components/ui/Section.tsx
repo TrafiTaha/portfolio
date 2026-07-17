@@ -1,37 +1,26 @@
 "use client";
 
-import { motion, useReducedMotion, type Variants } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import type { ReactNode } from "react";
 
 type SectionProps = {
   id: string;
   title?: string;
   subtitle?: string;
+  index?: string; // e.g. "01" — rendered as an nk-style overline "/01"
   className?: string;
   children: ReactNode;
 };
 
-export default function Section({ id, title, subtitle, className = "", children }: SectionProps) {
-  const reduceMotion = useReducedMotion();
+const letterVariants: Variants = {
+  hidden: { y: "115%" },
+  visible: (i: number) => ({
+    y: "0%",
+    transition: { duration: 0.9, ease: [0.76, 0, 0.24, 1], delay: i * 0.03 },
+  }),
+};
 
-  const letterVariants: Variants = {
-    initial: { y: "0%", opacity: 1 },
-    animate: (i: number) =>
-      reduceMotion
-        ? { y: "0%", opacity: 1 }
-        : {
-            y: ["0%", "-115%", "115%", "0%"],
-            opacity: [1, 0, 0, 1],
-            transition: {
-              duration: 1.2,
-              ease: [0.76, 0, 0.24, 1],
-              delay: i * 0.04,
-              repeat: Infinity,
-              repeatDelay: 6,
-            },
-          },
-  };
-
+export default function Section({ id, title, subtitle, index, className = "", children }: SectionProps) {
   let letterIndex = 0;
 
   return (
@@ -41,7 +30,29 @@ export default function Section({ id, title, subtitle, className = "", children 
     >
       {title && (
         <div className="relative w-full mb-8 md:mb-14 text-left">
-          <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-zinc-100 uppercase flex flex-wrap items-center leading-none">
+          {/* structural rule: index left, mono meta right */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="flex items-baseline justify-between gap-4 border-t border-white/[0.08] pt-4 mb-6 md:mb-8"
+          >
+            <span className="font-mono text-xs md:text-sm font-bold tracking-[0.3em] text-cyber-lime">
+              {index ? `/${index}` : "//"}
+            </span>
+            {subtitle && (
+              <span className="text-[10px] sm:text-xs font-mono font-semibold tracking-widest text-zinc-500 uppercase text-right">
+                {subtitle}
+              </span>
+            )}
+          </motion.div>
+          <motion.h2
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-60px" }}
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-zinc-100 uppercase flex flex-wrap items-center leading-none"
+          >
             {title.toUpperCase().split(" ").map((word, w) => (
               <span key={w} className="flex overflow-hidden py-1 pr-2.5 mr-[0.25em]">
                 {Array.from(word).map((letter) => {
@@ -51,8 +62,6 @@ export default function Section({ id, title, subtitle, className = "", children 
                       key={i}
                       custom={i}
                       variants={letterVariants}
-                      initial="initial"
-                      animate="animate"
                       className="inline-block"
                       style={{
                         textShadow:
@@ -65,18 +74,7 @@ export default function Section({ id, title, subtitle, className = "", children 
                 })}
               </span>
             ))}
-          </h2>
-          {subtitle && (
-            <motion.p
-              initial={{ opacity: 0, x: -10 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-[10px] sm:text-xs font-mono font-semibold tracking-widest text-zinc-500 uppercase mt-2.5"
-            >
-              {subtitle}
-            </motion.p>
-          )}
+          </motion.h2>
         </div>
       )}
       <div className="relative z-10">{children}</div>

@@ -94,7 +94,7 @@ function SkillCard({ skill }: { skill: Skill }) {
 
 export default function Skills() {
   return (
-    <Section id="skills" title="Skills" subtitle="Technologies I work with">
+    <Section id="skills" title="Skills" subtitle="Technologies I work with" index="02">
       <motion.div
         initial="hidden"
         whileInView="visible"

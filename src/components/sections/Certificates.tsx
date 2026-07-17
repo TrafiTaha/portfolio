@@ -229,13 +229,14 @@ export default function Certificates() {
         id="certificates"
         title="Certificates"
         subtitle="Professional training & credentials"
+        index="03"
       >
         <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-60px" }}
           variants={containerVariants}
-          className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6 max-w-4xl"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6"
         >
           {certificates.map((cert) => (
             <CertificateCard

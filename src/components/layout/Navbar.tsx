@@ -3,6 +3,8 @@
 import { motion } from "framer-motion";
 import { Github, Linkedin, Facebook, Instagram } from "lucide-react";
 import { useEffect, useState } from "react";
+import Magnetic from "@/components/ui/Magnetic";
+import { scrollToTarget } from "@/components/providers/SmoothScroll";
 import { personal } from "@/data/portfolio";
 
 const links = [
@@ -26,10 +28,7 @@ export default function Navbar() {
 
   const scrollTo = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
-    const el = document.getElementById(id);
-    if (!el) return;
-    const top = el.getBoundingClientRect().top + window.scrollY - 70;
-    window.scrollTo({ top, behavior: "smooth" });
+    scrollToTarget(`#${id}`, -70);
   };
 
   return (
@@ -49,7 +48,7 @@ export default function Navbar() {
       >
         <button
           type="button"
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          onClick={() => scrollToTarget(0)}
           className="font-mono text-sm font-bold tracking-tight text-zinc-100 hover:text-cyber-lime transition-colors pr-2 sm:pr-4 cursor-pointer"
           aria-label="Back to top"
         >
@@ -62,7 +61,7 @@ export default function Navbar() {
               <a
                 href={`#${link.id}`}
                 onClick={(e) => scrollTo(e, link.id)}
-                className="px-3 py-1.5 text-xs font-semibold tracking-wide text-zinc-400 uppercase rounded-full hover:text-zinc-100 hover:bg-white/5 transition-colors"
+                className="px-3 py-1.5 text-xs font-semibold tracking-wide text-zinc-400 uppercase rounded-full hover:text-zinc-100 hover:bg-white/5 transition-colors inline-flex"
               >
                 {link.label}
               </a>
@@ -71,42 +70,26 @@ export default function Navbar() {
         </ul>
 
         <div className="flex items-center gap-1 pl-2 sm:pl-4 border-l border-white/10">
-          <a
-            href={personal.github}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="GitHub profile"
-            className="p-2 text-zinc-400 hover:text-zinc-100 transition-colors"
-          >
-            <Github size={16} />
-          </a>
-          <a
-            href={personal.linkedin}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="LinkedIn profile"
-            className="p-2 text-zinc-400 hover:text-zinc-100 transition-colors"
-          >
-            <Linkedin size={16} />
-          </a>
-          <a
-            href={personal.facebook}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Facebook profile"
-            className="p-2 text-zinc-400 hover:text-zinc-100 transition-colors"
-          >
-            <Facebook size={16} />
-          </a>
-          <a
-            href={personal.instagram}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Instagram profile"
-            className="p-2 text-zinc-400 hover:text-zinc-100 transition-colors"
-          >
-            <Instagram size={16} />
-          </a>
+          {(
+            [
+              { href: personal.github, label: "GitHub profile", Icon: Github },
+              { href: personal.linkedin, label: "LinkedIn profile", Icon: Linkedin },
+              { href: personal.facebook, label: "Facebook profile", Icon: Facebook },
+              { href: personal.instagram, label: "Instagram profile", Icon: Instagram },
+            ] as const
+          ).map(({ href, label, Icon }) => (
+            <Magnetic key={label} strength={0.45}>
+              <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                className="p-2 text-zinc-400 hover:text-zinc-100 transition-colors inline-flex"
+              >
+                <Icon size={16} />
+              </a>
+            </Magnetic>
+          ))}
         </div>
       </nav>
     </motion.header>
