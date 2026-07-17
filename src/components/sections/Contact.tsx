@@ -14,12 +14,14 @@ const socials = [
   { label: "WhatsApp", href: personal.whatsapp },
 ];
 
+const headingContainer = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.06 } },
+};
+
 const wordReveal = {
   hidden: { y: "115%" },
-  visible: (i: number) => ({
-    y: "0%",
-    transition: { duration: 0.9, ease: [0.76, 0, 0.24, 1] as const, delay: i * 0.06 },
-  }),
+  visible: { y: "0%", transition: { duration: 0.9, ease: [0.76, 0, 0.24, 1] as const } },
 };
 
 export default function Contact() {
@@ -27,22 +29,24 @@ export default function Contact() {
     <Section id="contact" title="Contact" subtitle="Let's build something together" index="06">
       {/* Mega CTA */}
       <div className="pt-10 pb-16 md:pt-16 md:pb-24">
-        <h3 className="text-[11vw] sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter uppercase leading-[0.95] text-zinc-100 max-w-5xl">
+        <motion.h3
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "0px 0px -15% 0px" }}
+          variants={headingContainer}
+          className="text-[11vw] sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter uppercase leading-[0.95] text-zinc-100 max-w-5xl"
+        >
           {"The future is waiting — let's build it".split(" ").map((word, i) => (
             <span key={i} className="inline-flex overflow-hidden pb-1 mr-[0.22em]">
               <motion.span
-                custom={i}
                 variants={wordReveal}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: "-80px" }}
                 className={`inline-block ${i >= 5 ? "text-transparent [-webkit-text-stroke:1.5px_#22c55e]" : ""}`}
               >
                 {word}
               </motion.span>
             </span>
           ))}
-        </h3>
+        </motion.h3>
 
         <motion.div
           initial={{ opacity: 0, y: 24 }}
