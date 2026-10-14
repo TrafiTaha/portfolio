@@ -69,6 +69,8 @@ function Lightbox({
     };
   }, [onClose]);
 
+  if (!cert.image) return null;
+
   return (
     <motion.div
       variants={overlayVariants}
@@ -130,19 +132,23 @@ function CertificateCard({
   onOpen,
 }: {
   cert: Certificate;
-  onOpen: () => void;
+  onOpen?: () => void;
 }) {
   return (
     <motion.div
       variants={cardVariants}
       whileHover={{ y: -6 }}
-      className="group relative rounded-2xl border border-white/[0.06] bg-zinc-900/50 backdrop-blur-sm overflow-hidden cursor-pointer transition-colors duration-300 hover:border-white/15"
+      className={`group relative rounded-2xl border border-white/[0.06] bg-zinc-900/50 backdrop-blur-sm overflow-hidden transition-colors duration-300 hover:border-white/15 ${onOpen ? "cursor-pointer" : ""}`}
       onClick={onOpen}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") onOpen();
-      }}
+      role={onOpen ? "button" : undefined}
+      tabIndex={onOpen ? 0 : undefined}
+      onKeyDown={
+        onOpen
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") onOpen();
+            }
+          : undefined
+      }
     >
       {/* top glow */}
       <div
@@ -150,22 +156,38 @@ function CertificateCard({
         style={{ background: cert.color }}
       />
 
-      {/* certificate image preview */}
+      {/* certificate image preview, or a text-only panel when there is no scan */}
       <div className="relative w-full aspect-[1.414/1] bg-zinc-800 overflow-hidden">
-        <Image
-          src={cert.image}
-          alt={`${cert.title} certificate`}
-          fill
-          className="object-cover transition-transform duration-700 group-hover:scale-105"
-          sizes="(max-width: 640px) 95vw, (max-width: 1024px) 45vw, 35vw"
-        />
-        {/* overlay on hover */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-sm px-4 py-2 border border-white/20">
-            <ZoomIn size={16} className="text-white" />
-            <span className="text-sm font-medium text-white">View</span>
+        {cert.image ? (
+          <>
+            <Image
+              src={cert.image}
+              alt={`${cert.title} certificate`}
+              fill
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+              sizes="(max-width: 640px) 95vw, (max-width: 1024px) 45vw, 35vw"
+            />
+            {/* overlay on hover */}
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-sm px-4 py-2 border border-white/20">
+                <ZoomIn size={16} className="text-white" />
+                <span className="text-sm font-medium text-white">View</span>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div
+            className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center px-6"
+            style={{
+              background: `radial-gradient(90% 90% at 50% 0%, ${cert.color}26 0%, transparent 70%), #18181b`,
+            }}
+          >
+            <Award size={44} style={{ color: cert.color }} aria-hidden />
+            <span className="font-mono text-[11px] tracking-widest text-zinc-500 uppercase">
+              Official document
+            </span>
           </div>
-        </div>
+        )}
       </div>
 
       {/* info section */}
@@ -242,7 +264,7 @@ export default function Certificates() {
             <CertificateCard
               key={cert.title}
               cert={cert}
-              onOpen={() => setActiveCert(cert)}
+              onOpen={cert.image ? () => setActiveCert(cert) : undefined}
             />
           ))}
         </motion.div>

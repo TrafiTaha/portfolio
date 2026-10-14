@@ -57,7 +57,7 @@ export type Certificate = {
   issuer: string;
   duration: string;
   date: string;
-  image: string;
+  image?: string; // omit for text-only cards (e.g. documents that contain personal data)
   color: string;
 };
 
@@ -85,6 +85,13 @@ export const certificates: Certificate[] = [
     date: "December 2025",
     image: "/certificates/aitd-iset.png",
     color: "#1e3a8a",
+  },
+  {
+    title: "Student Enrolment Certificate",
+    issuer: "ISET Sidi Bouzid",
+    duration: "Academic Year 2025–2026",
+    date: "July 2026",
+    color: "#38bdf8",
   },
 ];
 
