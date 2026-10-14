@@ -184,7 +184,7 @@ function CertificateCard({
           >
             <Award size={44} style={{ color: cert.color }} aria-hidden />
             <span className="font-mono text-[11px] tracking-widest text-zinc-500 uppercase">
-              Official document
+              Academic license
             </span>
           </div>
         )}

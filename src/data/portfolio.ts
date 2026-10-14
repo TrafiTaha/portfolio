@@ -87,9 +87,9 @@ export const certificates: Certificate[] = [
     color: "#1e3a8a",
   },
   {
-    title: "Student Enrolment Certificate",
+    title: "License in Web Development & Multimedia",
     issuer: "ISET Sidi Bouzid",
-    duration: "Academic Year 2025–2026",
+    duration: "Enrolled 2025–2026",
     date: "July 2026",
     color: "#38bdf8",
   },
