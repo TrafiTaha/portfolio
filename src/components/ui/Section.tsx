@@ -1,80 +1,65 @@
 "use client";
 
-import { motion, type Variants } from "framer-motion";
-import type { ReactNode } from "react";
+import { motion, useInView, type Variants } from "framer-motion";
+import { useRef, type ReactNode } from "react";
 
 type SectionProps = {
   id: string;
   title?: string;
   subtitle?: string;
-  index?: string; // e.g. "01" — rendered as an nk-style overline "/01"
+  index?: string;
   className?: string;
   children: ReactNode;
 };
 
-const letterVariants: Variants = {
-  hidden: { y: "115%" },
+const word: Variants = {
+  hidden: { y: "110%" },
   visible: (i: number) => ({
     y: "0%",
-    transition: { duration: 0.9, ease: [0.76, 0, 0.24, 1], delay: i * 0.03 },
+    transition: { duration: 0.7, ease: [0.76, 0, 0.24, 1], delay: i * 0.07 },
   }),
 };
 
+// Shared section shell: mono index tab, huge condensed title with a hand-drawn
+// underline. The trigger lives on the heading container; the masked words
+// animate through variants (never whileInView on an element hidden by its own mask).
 export default function Section({ id, title, subtitle, index, className = "", children }: SectionProps) {
-  let letterIndex = 0;
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "0px 0px -10% 0px" });
 
   return (
     <section
       id={id}
-      className={`w-full max-w-[86rem] mx-auto px-5 py-16 md:px-16 md:py-24 lg:px-20 relative scroll-mt-16 md:scroll-mt-24 ${className}`}
+      className={`relative mx-auto w-full max-w-[86rem] scroll-mt-16 px-5 py-16 md:scroll-mt-24 md:px-16 md:py-24 lg:px-20 ${className}`}
     >
       {title && (
-        <div className="relative w-full mb-8 md:mb-14 text-left">
-          {/* structural rule: index left, mono meta right */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="flex items-baseline justify-between gap-4 border-t border-white/[0.08] pt-4 mb-6 md:mb-8"
-          >
-            <span className="font-mono text-xs md:text-sm font-bold tracking-[0.3em] text-cyber-lime">
-              {index ? `/${index}` : "//"}
+        <div ref={ref} className="mb-10 md:mb-16">
+          <div className="mb-4 flex items-baseline justify-between gap-4 border-t-2 border-ink pt-3">
+            <span className="rounded-sm bg-ink px-2 py-0.5 font-mono text-xs font-bold tracking-[0.25em] text-paper">
+              Nº {index ?? "00"}
             </span>
             {subtitle && (
-              <span className="text-[10px] sm:text-xs font-mono font-semibold tracking-widest text-zinc-500 uppercase text-right">
+              <span className="text-right font-mono text-[10px] font-semibold tracking-widest text-ink-soft uppercase sm:text-xs">
                 {subtitle}
               </span>
             )}
-          </motion.div>
+          </div>
           <motion.h2
             initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-60px" }}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-zinc-100 uppercase flex flex-wrap items-center leading-none"
+            animate={inView ? "visible" : "hidden"}
+            className="flex flex-wrap font-display text-[17vw] leading-[0.95] tracking-tight text-ink uppercase sm:text-7xl md:text-8xl lg:text-9xl"
           >
-            {title.toUpperCase().split(" ").map((word, w) => (
-              <span key={w} className="flex overflow-hidden py-1 pr-2.5 mr-[0.25em]">
-                {Array.from(word).map((letter) => {
-                  const i = letterIndex++;
-                  return (
-                    <motion.span
-                      key={i}
-                      custom={i}
-                      variants={letterVariants}
-                      className="inline-block"
-                      style={{
-                        textShadow:
-                          "2px 2px 0px rgba(34,197,94,0.08), 4px 4px 0px rgba(0,0,0,0.85), 8px 8px 24px rgba(0,0,0,0.9)",
-                      }}
-                    >
-                      {letter}
-                    </motion.span>
-                  );
-                })}
+            {title.split(" ").map((w, i) => (
+              <span key={i} className="mr-[0.25em] inline-flex overflow-hidden pt-[0.06em] pb-[0.04em]">
+                <motion.span custom={i} variants={word} className="inline-block">
+                  {w}
+                </motion.span>
               </span>
             ))}
           </motion.h2>
+          <svg viewBox="0 0 400 14" className={`sketch mt-1 h-3 w-52 overflow-visible sm:w-72 ${inView ? "on" : ""}`} aria-hidden>
+            <path d="M3 8q50-8 100-2t100 0 100-3 94 4" fill="none" stroke="#ff4d1c" strokeWidth="4" strokeLinecap="round" />
+          </svg>
         </div>
       )}
       <div className="relative z-10">{children}</div>

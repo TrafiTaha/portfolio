@@ -7,56 +7,15 @@ import Image from "next/image";
 import Section from "@/components/ui/Section";
 import { certificates, type Certificate } from "@/data/portfolio";
 
-/* ---------- animation variants ---------- */
-
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.2 },
-  },
+const containerVariants = { hidden: {}, visible: { transition: { staggerChildren: 0.15 } } };
+const noteVariants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] as const } },
 };
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 40, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] as const },
-  },
-};
+/* ---------- lightbox (Esc closes, scroll lock always released) ---------- */
 
-const overlayVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1 },
-  exit: { opacity: 0 },
-};
-
-const modalVariants = {
-  hidden: { opacity: 0, scale: 0.88, y: 30 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-    transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] as const },
-  },
-  exit: {
-    opacity: 0,
-    scale: 0.92,
-    y: 20,
-    transition: { duration: 0.25 },
-  },
-};
-
-/* ---------- lightbox modal ---------- */
-
-function Lightbox({
-  cert,
-  onClose,
-}: {
-  cert: Certificate;
-  onClose: () => void;
-}) {
+function Lightbox({ cert, onClose }: { cert: Certificate; onClose: () => void }) {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -73,50 +32,44 @@ function Lightbox({
 
   return (
     <motion.div
-      variants={overlayVariants}
-      initial="hidden"
-      animate="visible"
-      exit="exit"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       className="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-8"
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${cert.title} certificate`}
     >
-      {/* backdrop */}
-      <div className="absolute inset-0 bg-black/85 backdrop-blur-md" />
-
-      {/* modal content */}
+      <div className="absolute inset-0 bg-ink/85" />
       <motion.div
-        variants={modalVariants}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
+        initial={{ opacity: 0, scale: 0.92, y: 24, rotate: -1.5 }}
+        animate={{ opacity: 1, scale: 1, y: 0, rotate: 0, transition: { duration: 0.35 } }}
+        exit={{ opacity: 0, scale: 0.94, y: 16, transition: { duration: 0.2 } }}
         className="relative z-10 w-full max-w-4xl"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* close button */}
         <button
           onClick={onClose}
-          className="absolute -top-12 right-0 p-2 rounded-full bg-zinc-800/80 text-zinc-300 hover:text-white hover:bg-zinc-700 transition-colors cursor-pointer"
+          autoFocus
+          className="absolute -top-12 right-0 cursor-pointer rounded-full border-2 border-ink bg-paper p-2 text-ink hover:bg-signal"
           aria-label="Close lightbox"
         >
           <X size={20} />
         </button>
-
-        {/* certificate image */}
-        <div className="relative w-full aspect-[1.414/1] rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-black/50">
+        <div className="relative aspect-[1.414/1] w-full border-[3px] border-ink bg-white shadow-[8px_8px_0_#ff4d1c]">
           <Image
             src={cert.image}
             alt={`${cert.title} certificate`}
             fill
-            className="object-contain bg-white"
+            className="object-contain"
             sizes="(max-width: 768px) 95vw, 56rem"
             priority
           />
         </div>
-
-        {/* label */}
-        <div className="mt-4 text-center">
-          <h3 className="text-lg font-bold text-zinc-100">{cert.title}</h3>
-          <p className="text-sm text-zinc-400 mt-1">
+        <div className="mt-4 text-center text-paper">
+          <h3 className="font-display text-2xl tracking-wide uppercase">{cert.title}</h3>
+          <p className="mt-1 font-mono text-xs tracking-wider uppercase">
             {cert.issuer} · {cert.date}
           </p>
         </div>
@@ -125,121 +78,81 @@ function Lightbox({
   );
 }
 
-/* ---------- certificate card ---------- */
+/* ---------- pinned paper note ---------- */
 
-function CertificateCard({
-  cert,
-  onOpen,
-}: {
-  cert: Certificate;
-  onOpen?: () => void;
-}) {
-  return (
-    <motion.div
-      variants={cardVariants}
-      whileHover={{ y: -6 }}
-      className={`group relative rounded-2xl border border-white/[0.06] bg-zinc-900/50 backdrop-blur-sm overflow-hidden transition-colors duration-300 hover:border-white/15 ${onOpen ? "cursor-pointer" : ""}`}
-      onClick={onOpen}
-      role={onOpen ? "button" : undefined}
-      tabIndex={onOpen ? 0 : undefined}
-      onKeyDown={
-        onOpen
-          ? (e) => {
-              if (e.key === "Enter" || e.key === " ") onOpen();
-            }
-          : undefined
-      }
-    >
-      {/* top glow */}
-      <div
-        className="absolute -top-20 left-1/2 -translate-x-1/2 w-64 h-40 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none blur-3xl"
-        style={{ background: cert.color }}
-      />
+function Note({ cert, index, onOpen }: { cert: Certificate; index: number; onOpen?: () => void }) {
+  const tilt = [-2.2, 1.6, -1.2, 2.4][index % 4];
 
-      {/* certificate image preview, or a text-only panel when there is no scan */}
-      <div className="relative w-full aspect-[1.414/1] bg-zinc-800 overflow-hidden">
+  const body = (
+    <>
+      <div className="relative aspect-[1.414/1] w-full overflow-hidden border-2 border-ink bg-paper-2">
         {cert.image ? (
           <>
             <Image
               src={cert.image}
               alt={`${cert.title} certificate`}
               fill
-              className="object-cover transition-transform duration-700 group-hover:scale-105"
-              sizes="(max-width: 640px) 95vw, (max-width: 1024px) 45vw, 35vw"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              sizes="(max-width: 640px) 95vw, (max-width: 1024px) 45vw, 30vw"
             />
-            {/* overlay on hover */}
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-sm px-4 py-2 border border-white/20">
-                <ZoomIn size={16} className="text-white" />
-                <span className="text-sm font-medium text-white">View</span>
-              </div>
-            </div>
+            <span className="absolute inset-0 flex items-center justify-center bg-ink/0 opacity-0 transition-all duration-300 group-hover:bg-ink/35 group-hover:opacity-100 group-focus-visible:bg-ink/35 group-focus-visible:opacity-100">
+              <span className="inline-flex items-center gap-2 border-2 border-ink bg-paper px-3 py-1.5 font-mono text-xs font-bold uppercase">
+                <ZoomIn size={14} aria-hidden /> View
+              </span>
+            </span>
           </>
         ) : (
-          <div
-            className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center px-6"
-            style={{
-              background: `radial-gradient(90% 90% at 50% 0%, ${cert.color}26 0%, transparent 70%), #18181b`,
-            }}
-          >
-            <Award size={44} style={{ color: cert.color }} aria-hidden />
-            <span className="font-mono text-[11px] tracking-widest text-zinc-500 uppercase">
+          <div className="hatch absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center">
+            <span className="-rotate-6 border-[3px] border-signal bg-paper px-4 py-2 font-mono text-xs font-bold tracking-[0.25em] text-signal uppercase">
               Academic license
             </span>
+            <Award size={36} className="text-ink" aria-hidden />
           </div>
         )}
       </div>
 
-      {/* info section */}
-      <div className="relative z-10 p-5">
-        {/* accent stripe */}
-        <div
-          className="absolute top-0 left-5 right-5 h-[2px] rounded-full"
-          style={{
-            background: `linear-gradient(90deg, transparent, ${cert.color}, transparent)`,
-          }}
-        />
+      <h3 className="mt-4 font-display text-xl leading-tight tracking-wide text-ink uppercase">{cert.title}</h3>
+      <p className="mt-1.5 flex items-center gap-1.5 text-xs font-semibold text-ink-soft">
+        <Building2 size={12} aria-hidden /> {cert.issuer}
+      </p>
+      <p className="mt-3 flex items-center gap-4 border-t border-dashed border-ink pt-3 font-mono text-[11px] font-bold tracking-wider text-ink uppercase">
+        <span className="inline-flex items-center gap-1.5">
+          <Clock size={11} aria-hidden /> {cert.duration}
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <Calendar size={11} aria-hidden /> {cert.date}
+        </span>
+      </p>
+    </>
+  );
 
-        <div className="flex items-start gap-3 mt-2">
-          {/* icon */}
-          <div
-            className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
-            style={{
-              background: `${cert.color}20`,
-              border: `1px solid ${cert.color}30`,
-            }}
+  const shell =
+    "group relative block h-full w-full border-2 border-ink bg-[#fffdf8] p-4 pt-6 text-left shadow-[5px_5px_0_#111] transition-transform duration-300";
+
+  return (
+    <motion.li variants={noteVariants} className="relative pt-4">
+      {/* pin */}
+      <span
+        aria-hidden
+        className="absolute top-1 left-1/2 z-10 h-4 w-4 -translate-x-1/2 rounded-full border-2 border-ink bg-signal shadow-[1px_2px_0_#111]"
+      />
+      <div style={{ rotate: `${tilt}deg` }} className="transition-transform duration-300 hover:rotate-0!">
+        {onOpen ? (
+          <button
+            type="button"
+            onClick={onOpen}
+            aria-label={`View ${cert.title} certificate`}
+            className={`${shell} cursor-pointer hover:-translate-y-1`}
           >
-            <Award size={18} style={{ color: cert.color }} />
-          </div>
-
-          <div className="flex-1 min-w-0">
-            <h3 className="text-base font-bold text-zinc-100 leading-tight group-hover:text-white transition-colors">
-              {cert.title}
-            </h3>
-            <div className="flex items-center gap-1.5 mt-1.5 text-zinc-500">
-              <Building2 size={12} />
-              <span className="text-xs font-medium">{cert.issuer}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* meta badges */}
-        <div className="flex items-center gap-3 mt-4">
-          <span className="inline-flex items-center gap-1.5 text-[11px] font-mono font-semibold tracking-wider text-zinc-500 uppercase">
-            <Clock size={11} />
-            {cert.duration}
-          </span>
-          <span className="inline-flex items-center gap-1.5 text-[11px] font-mono font-semibold tracking-wider text-zinc-500 uppercase">
-            <Calendar size={11} />
-            {cert.date}
-          </span>
-        </div>
+            {body}
+          </button>
+        ) : (
+          <div className={shell}>{body}</div>
+        )}
       </div>
-    </motion.div>
+    </motion.li>
   );
 }
-
-/* ---------- main section ---------- */
 
 export default function Certificates() {
   const [activeCert, setActiveCert] = useState<Certificate | null>(null);
@@ -247,35 +160,27 @@ export default function Certificates() {
 
   return (
     <>
-      <Section
-        id="certificates"
-        title="Certificates"
-        subtitle="Professional training & credentials"
-        index="03"
-      >
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-60px" }}
-          variants={containerVariants}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6"
-        >
-          {certificates.map((cert) => (
-            <CertificateCard
-              key={cert.title}
-              cert={cert}
-              onOpen={cert.image ? () => setActiveCert(cert) : undefined}
-            />
-          ))}
-        </motion.div>
+      <Section id="certificates" title="Certificates" subtitle="Professional training & credentials" index="03">
+        <div className="relative">
+          {/* the cord everything is pinned to */}
+          <svg viewBox="0 0 1000 40" preserveAspectRatio="none" className="absolute inset-x-0 top-1 h-8 w-full" aria-hidden>
+            <path d="M0 10Q250 40 500 14T1000 12" fill="none" stroke="#111" strokeWidth="2.5" vectorEffect="non-scaling-stroke" />
+          </svg>
+          <motion.ul
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-60px" }}
+            variants={containerVariants}
+            className="grid grid-cols-1 gap-x-8 gap-y-10 pt-6 sm:grid-cols-2 lg:grid-cols-3"
+          >
+            {certificates.map((cert, i) => (
+              <Note key={cert.title} cert={cert} index={i} onOpen={cert.image ? () => setActiveCert(cert) : undefined} />
+            ))}
+          </motion.ul>
+        </div>
       </Section>
 
-      {/* lightbox portal */}
-      <AnimatePresence>
-        {activeCert && (
-          <Lightbox cert={activeCert} onClose={closeLightbox} />
-        )}
-      </AnimatePresence>
+      <AnimatePresence>{activeCert && <Lightbox cert={activeCert} onClose={closeLightbox} />}</AnimatePresence>
     </>
   );
 }

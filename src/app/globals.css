@@ -1,82 +1,133 @@
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --color-cyber-lime: #22c55e;
+  --font-display: var(--f-display), "Impact", sans-serif;
+  --font-hand: var(--f-hand), cursive;
+  --font-sans: var(--f-sans), system-ui, sans-serif;
+  --font-mono: var(--f-mono), ui-monospace, monospace;
+  --color-paper: #f4f1ea;
+  --color-paper-2: #ebe6da;
+  --color-ink: #111111;
+  --color-ink-soft: #55524a;
+  --color-signal: #ff4d1c;
 }
 
 @layer base {
-  /* No CSS scroll-behavior here: Lenis owns scrolling, and the two conflict. */
+  /* No CSS scroll-behavior: Lenis owns scrolling. */
   body {
-    @apply bg-zinc-950 text-zinc-100 antialiased;
-    font-family: var(--font-geist-sans), sans-serif;
+    background:
+      radial-gradient(70% 50% at 20% 0%, rgba(255, 255, 255, 0.55), transparent 70%),
+      radial-gradient(60% 40% at 90% 60%, rgba(17, 17, 17, 0.04), transparent 70%),
+      #f4f1ea;
+    color: #111;
+    font-family: var(--f-sans), system-ui, sans-serif;
     min-height: 100svh;
     overflow-x: clip;
   }
 
   ::selection {
-    background: #22c55e;
-    color: #09090b;
+    background: #ff4d1c;
+    color: #111;
   }
 }
 
-/* The "world" layer: grid field the camera travels through.
-   Overscanned (negative inset) so scroll-zoom and mouse tilt never expose edges. */
-.site-backdrop {
-  position: fixed;
-  inset: -6%;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(60% 40% at 50% 0%, rgba(34, 197, 94, 0.06) 0%, transparent 70%),
-    #09090b;
-}
-
-.site-backdrop::after {
+/* Paper grain: one static SVG-noise tile, multiplied over everything. */
+body::after {
   content: "";
-  position: absolute;
+  position: fixed;
   inset: 0;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: 56px 56px;
-  mask-image: radial-gradient(80% 60% at 50% 20%, black 0%, transparent 100%);
-  -webkit-mask-image: radial-gradient(80% 60% at 50% 20%, black 0%, transparent 100%);
+  z-index: 9990;
+  pointer-events: none;
+  opacity: 0.16;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .1  0 0 0 0 .1  0 0 0 0 .09  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 5px;
+  width: 6px;
 }
-
 ::-webkit-scrollbar-track {
-  background: #09090b;
+  background: #f4f1ea;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: #27272a;
+  background: #111;
   border-radius: 3px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: #22c55e;
+  background: #ff4d1c;
 }
 
-/* Custom cursor: hide the native one while ours is mounted */
 .custom-cursor-active,
 .custom-cursor-active * {
   cursor: none !important;
 }
 
-/* Visible keyboard focus (the custom cursor never suppresses this) */
 :focus-visible {
-  outline: 2px solid #22c55e;
+  outline: 3px solid #ff4d1c;
   outline-offset: 3px;
-  border-radius: 2px;
+  border-radius: 3px;
 }
 
-/* Infinite marquee — the track holds two identical rows, shift by one row */
+/* ---------- ink draw-on ----------
+   Any <svg class="sketch"> draws its strokes on once it also has .on.
+   Dash is longer than any path so it needs no pathLength attribute.
+   Paused-at-start keeps strokes hidden until .on; .keep opts out. */
+@keyframes ink-draw {
+  from {
+    stroke-dashoffset: 2400;
+  }
+}
+.sketch :is(path, line, rect, circle, ellipse, polyline, polygon):not(.keep) {
+  stroke-dasharray: 2400;
+  animation: ink-draw 1.1s cubic-bezier(0.6, 0, 0.2, 1) both paused;
+}
+.sketch :is(path, line, rect, circle, ellipse, polyline, polygon):nth-child(2n):not(.keep) {
+  animation-delay: 0.08s;
+}
+.sketch :is(path, line, rect, circle, ellipse, polyline, polygon):nth-child(3n):not(.keep) {
+  animation-delay: 0.16s;
+}
+.sketch :is(path, line, rect, circle, ellipse, polyline, polygon):nth-child(5n):not(.keep) {
+  animation-delay: 0.24s;
+}
+.sketch.on :is(path, line, rect, circle, ellipse, polyline, polygon):not(.keep) {
+  animation-play-state: running;
+}
+
+/* ---------- ambient motion (transform/opacity only) ---------- */
+@keyframes swing {
+  0%,
+  100% {
+    rotate: -2.5deg;
+  }
+  50% {
+    rotate: 2.5deg;
+  }
+}
+@keyframes sway {
+  0%,
+  100% {
+    translate: -5px 0;
+  }
+  50% {
+    translate: 5px -3px;
+  }
+}
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes steam {
+  from {
+    opacity: 0.7;
+    translate: 0 0;
+  }
+  to {
+    opacity: 0;
+    translate: 3px -14px;
+  }
+}
 @keyframes marquee {
   from {
     transform: translateX(0);
@@ -85,18 +136,56 @@
     transform: translateX(-50%);
   }
 }
-
 .animate-marquee {
-  animation: marquee 24s linear infinite;
+  animation: marquee 30s linear infinite;
   will-change: transform;
+}
+.animate-swing {
+  animation: swing 5s ease-in-out infinite;
+  transform-origin: 50% 0;
+}
+.animate-blink {
+  animation: blink 1s steps(2) infinite;
+}
+.animate-steam {
+  animation: steam 2.4s ease-out infinite;
+}
+.sway-a {
+  animation: sway 7s ease-in-out infinite;
+}
+.sway-b {
+  animation: sway 9s ease-in-out infinite reverse;
+}
+
+/* roll-up door slats */
+.slats {
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0 17px,
+      rgba(17, 17, 17, 0.85) 17px 19px,
+      transparent 19px 20px
+    ),
+    #f4f1ea;
+}
+.hatch {
+  background: repeating-linear-gradient(135deg, rgba(17, 17, 17, 0.55) 0 1.5px, transparent 1.5px 7px), #e4ded0;
+}
+.blueprint-grid {
+  background-image:
+    linear-gradient(rgba(17, 17, 17, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 17, 17, 0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
 }
 
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
+    animation: none !important;
     transition-duration: 0.01ms !important;
+  }
+  .animate-marquee {
+    animation: none !important;
   }
 }

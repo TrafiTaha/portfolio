@@ -1,18 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Anton, Caveat_Brush, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import SmoothScroll from "@/components/providers/SmoothScroll";
 import { personal, SITE_URL } from "@/data/portfolio";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const display = Anton({ weight: "400", variable: "--f-display", subsets: ["latin"] });
+const hand = Caveat_Brush({ weight: "400", variable: "--f-hand", subsets: ["latin"] });
+const sans = Inter({ variable: "--f-sans", subsets: ["latin"] });
+const mono = JetBrains_Mono({ variable: "--f-mono", subsets: ["latin"] });
 
 const title = `${personal.name} | Software Engineer — Mobile & Web`;
 const description =
@@ -83,8 +78,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+    <html lang="en">
+      <body className={`${display.variable} ${hand.variable} ${sans.variable} ${mono.variable} antialiased`}>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}

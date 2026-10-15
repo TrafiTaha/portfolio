@@ -7,26 +7,25 @@ function Row() {
     <div className="flex shrink-0 items-center" aria-hidden>
       {items.map((item) => (
         <span key={item} className="flex items-center">
-          <span className="mx-6 md:mx-10 text-3xl md:text-5xl font-black tracking-tighter uppercase text-zinc-800 whitespace-nowrap">
+          <span className="mx-5 whitespace-nowrap font-display text-3xl tracking-wide text-paper uppercase md:mx-8 md:text-5xl">
             {item}
           </span>
-          <span className="text-cyber-lime text-xl md:text-3xl select-none">✦</span>
+          <span className="select-none text-xl text-signal md:text-3xl">✦</span>
         </span>
       ))}
     </div>
   );
 }
 
+// Black "washi tape" strip, slightly skewed across the page.
 export default function Marquee() {
   return (
-    <div
-      className="w-full overflow-hidden border-y border-zinc-800/60 py-5 md:py-7 flex select-none"
-      role="marquee"
-      aria-label="Available for work — Software Engineer — Mobile and Web — Tunis to worldwide"
-    >
-      <div className="flex animate-marquee">
-        <Row />
-        <Row />
+    <div className="relative my-6 -rotate-[1.2deg] overflow-hidden" role="marquee" aria-label="Available for work. Software engineer. Mobile and web. Tunis to worldwide.">
+      <div className="flex w-full select-none border-y-2 border-ink bg-ink py-3 md:py-4">
+        <div className="animate-marquee flex">
+          <Row />
+          <Row />
+        </div>
       </div>
     </div>
   );

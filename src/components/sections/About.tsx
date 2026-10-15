@@ -1,89 +1,109 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import Section from "@/components/ui/Section";
 import { aboutTags, certificates, personal, projects, skills } from "@/data/portfolio";
 
-const container = {
-  visible: { transition: { staggerChildren: 0.2 } },
-};
-
-const wordReveal = {
-  hidden: { y: "115%", opacity: 0 },
-  visible: { y: "0%", opacity: 1, transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1] as const } },
-};
-
+const container = { hidden: {}, visible: { transition: { staggerChildren: 0.12 } } };
 const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" as const } },
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" as const } },
 };
 
 const stats = [
-  { value: String(projects.length), suffix: "", label: "featured projects", aside: "*built to ship, not to demo" },
-  { value: String(skills.length), suffix: "+", label: "technologies", aside: "*and counting, every week" },
-  { value: String(certificates.length), suffix: "", label: "certifications", aside: "*from DevOps to AI" },
-  { value: "1", suffix: "", label: "mission", aside: "*simplify human complexity" },
+  { value: String(projects.length), suffix: "", label: "featured projects", aside: "built to ship, not to demo" },
+  { value: String(skills.length), suffix: "+", label: "technologies", aside: "and counting, every week" },
+  { value: String(certificates.length), suffix: "", label: "certifications", aside: "from DevOps to AI" },
+  { value: "1", suffix: "", label: "mission", aside: "simplify human complexity" },
 ];
 
 export default function About() {
   return (
-    <Section id="about" title="About Me" subtitle="Get to know me" index="01" className="min-h-[70svh] flex flex-col justify-center">
-      <motion.div
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-50px" }}
-        variants={container}
-        className="max-w-4xl"
-      >
-        <motion.h3 className="text-3xl md:text-4xl lg:text-6xl font-black text-white leading-none tracking-tighter uppercase mb-6 flex flex-wrap gap-x-3 gap-y-1">
-          {personal.headline.split(" ").map((word, i) => (
-            <span key={i} className="overflow-hidden inline-flex pb-1">
-              <motion.span variants={wordReveal} className="inline-block">
-                {word}
-              </motion.span>
-            </span>
-          ))}
-        </motion.h3>
+    <Section id="about" title="About Me" subtitle="Get to know me" index="01">
+      <div className="grid items-start gap-12 md:grid-cols-12 md:gap-10">
+        {/* taped, hand-framed portrait */}
+        <motion.figure
+          initial={{ opacity: 0, rotate: -6, y: 30 }}
+          whileInView={{ opacity: 1, rotate: -2.5, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className="relative mx-auto w-full max-w-sm md:col-span-5 md:max-w-none"
+        >
+          <span aria-hidden className="absolute -top-3 left-6 z-10 h-6 w-20 -rotate-6 bg-signal/80 shadow-sm" />
+          <span aria-hidden className="absolute -top-3 right-6 z-10 h-6 w-20 rotate-6 bg-signal/80 shadow-sm" />
+          <div className="border-2 border-ink bg-paper p-3 pb-14 shadow-[8px_8px_0_#111]">
+            <div className="relative aspect-[4/5] w-full overflow-hidden border-2 border-ink grayscale-[0.35] contrast-[1.05]">
+              <Image
+                src={personal.image}
+                alt={`Portrait of ${personal.name}`}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 90vw, 40vw"
+              />
+            </div>
+            <figcaption className="absolute inset-x-0 bottom-3 text-center font-hand text-2xl text-ink">
+              {personal.firstName}, {personal.location.split(",")[0]}
+            </figcaption>
+          </div>
+        </motion.figure>
 
-        <motion.p variants={fadeUp} className="text-base md:text-lg lg:text-xl text-zinc-400 font-medium leading-relaxed mb-8">
-          Based in <strong className="text-zinc-100">Tunis, Tunisia</strong>, I am a{" "}
-          <strong className="text-zinc-100">Software Engineer</strong> focused on shipping products people actually
-          use — interactive web platforms, secure backend APIs and mobile experiences. I care about the details:
-          performance budgets, clean data models, and interfaces that feel alive. Currently open to{" "}
-          <strong className="text-cyber-lime">new opportunities and collaborations</strong>.
-        </motion.p>
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          variants={container}
+          className="md:col-span-7"
+        >
+          <motion.h3
+            variants={fadeUp}
+            className="font-display text-4xl leading-[0.95] tracking-tight text-ink uppercase md:text-5xl lg:text-6xl"
+          >
+            High-impact{" "}
+            <span className="text-transparent [-webkit-text-stroke:2px_#111]">mobile &amp; web</span> applications
+          </motion.h3>
 
-        <motion.div variants={fadeUp} className="flex flex-wrap gap-2 md:gap-3">
-          {aboutTags.map((tag) => (
-            <span
-              key={tag}
-              className="px-4 py-2 rounded-full border border-white/10 bg-zinc-900/50 text-zinc-300 font-mono text-xs md:text-sm tracking-wide hover:border-cyber-lime hover:text-cyber-lime hover:bg-green-950/20 transition-all duration-300 cursor-default"
-            >
-              {tag}
-            </span>
-          ))}
+          <motion.p variants={fadeUp} className="mt-6 text-base leading-relaxed text-ink/80 md:text-lg">
+            Based in <strong className="text-ink">Tunis, Tunisia</strong>, I am a{" "}
+            <strong className="text-ink">Software Engineer</strong> focused on shipping products people actually use:
+            interactive web platforms, secure backend APIs and mobile experiences. I care about the details, from
+            performance budgets and clean data models to interfaces that feel alive. Currently open to{" "}
+            <mark className="bg-signal/30 px-1 font-semibold text-ink">new opportunities and collaborations</mark>.
+          </motion.p>
+
+          <motion.div variants={fadeUp} className="mt-8 flex flex-wrap gap-3">
+            {aboutTags.map((tag, i) => (
+              <span
+                key={tag}
+                style={{ rotate: `${((i * 5) % 7) - 3}deg` }}
+                className={`border-2 border-dashed px-3 py-1.5 font-mono text-xs font-bold tracking-widest uppercase transition-colors md:text-sm ${
+                  i % 4 === 0 ? "border-signal text-signal" : "border-ink text-ink"
+                } hover:bg-ink hover:text-paper`}
+              >
+                {tag}
+              </span>
+            ))}
+          </motion.div>
         </motion.div>
-      </motion.div>
+      </div>
 
-      {/* Stats — big numbers with small honest asides */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-zinc-800/60 border border-zinc-800/60 rounded-2xl overflow-hidden mt-14 md:mt-20">
+      {/* ledger of honest numbers */}
+      <div className="mt-16 grid grid-cols-2 gap-[2px] border-2 border-ink bg-ink md:mt-24 lg:grid-cols-4">
         {stats.map((stat, i) => (
           <motion.div
             key={stat.label}
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-40px" }}
-            transition={{ duration: 0.7, delay: i * 0.08, ease: [0.76, 0, 0.24, 1] }}
-            className="bg-zinc-950 p-6 md:p-8 flex flex-col"
+            transition={{ duration: 0.6, delay: i * 0.08 }}
+            className="flex flex-col bg-paper p-5 md:p-7"
           >
-            <span className="text-4xl md:text-6xl font-black tracking-tighter text-zinc-100 leading-none">
+            <span className="font-display text-5xl leading-none text-ink md:text-7xl">
               {stat.value}
-              <span className="text-cyber-lime">{stat.suffix}</span>
+              <span className="text-signal">{stat.suffix}</span>
             </span>
-            <span className="text-xs md:text-sm font-semibold text-zinc-300 uppercase tracking-widest mt-3">
-              {stat.label}
-            </span>
-            <span className="font-mono text-[10px] md:text-xs text-zinc-600 mt-1.5">{stat.aside}</span>
+            <span className="mt-3 font-mono text-xs font-bold tracking-widest text-ink uppercase">{stat.label}</span>
+            <span className="mt-1 font-hand text-lg text-ink-soft">{stat.aside}</span>
           </motion.div>
         ))}
       </div>

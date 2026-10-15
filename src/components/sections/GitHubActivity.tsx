@@ -25,19 +25,6 @@ type Repo = {
   fork: boolean;
 };
 
-const languageColors: Record<string, string> = {
-  TypeScript: "#3178c6",
-  JavaScript: "#f7df1e",
-  PHP: "#8892bf",
-  Blade: "#ff2d20",
-  HTML: "#e34c26",
-  CSS: "#563d7c",
-  Dart: "#00b4ab",
-  Python: "#3572a5",
-  Kotlin: "#a97bff",
-  Java: "#b07219",
-};
-
 function timeAgo(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
   const days = Math.floor(diff / 86400000);
@@ -83,19 +70,18 @@ export default function GitHubActivity() {
     : [];
 
   return (
-    <Section id="github" title="GitHub" subtitle="Live from the source — real repositories, real commits" index="05">
+    <Section id="github" title="GitHub" subtitle="Live from the source: real repositories, real commits" index="05">
       {failed ? (
-        <p className="text-sm text-zinc-500 font-mono">
-          Could not reach the GitHub API right now —{" "}
-          <a href={personal.github} target="_blank" rel="noopener noreferrer" className="text-cyber-lime hover:underline">
-            visit github.com/{personal.githubUser}
+        <p className="font-mono text-sm text-ink-soft">
+          Could not reach the GitHub API right now.{" "}
+          <a href={personal.github} target="_blank" rel="noopener noreferrer" className="font-bold text-ink underline decoration-signal decoration-2 underline-offset-4">
+            Visit github.com/{personal.githubUser}
           </a>{" "}
           instead.
         </p>
       ) : (
         <div className="flex flex-col gap-10">
-          {/* Stats row */}
-          <div className="grid grid-cols-3 gap-3 md:gap-6 max-w-2xl">
+          <div className="grid max-w-2xl grid-cols-3 gap-3 md:gap-5">
             {(stats.length ? stats : Array.from({ length: 3 })).map((stat, i) => {
               const s = stat as (typeof stats)[number] | undefined;
               return (
@@ -104,27 +90,27 @@ export default function GitHubActivity() {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: i * 0.1 }}
-                  className="rounded-xl border border-white/5 bg-zinc-900/40 p-4 md:p-5"
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                  style={{ rotate: `${(i - 1) * 1.2}deg` }}
+                  className="border-2 border-ink bg-[#fffdf8] p-3 shadow-[4px_4px_0_#111] md:p-5"
                 >
                   {s ? (
                     <>
-                      <s.icon size={16} className="text-cyber-lime mb-3" aria-hidden />
-                      <p className="text-2xl md:text-3xl font-black text-zinc-100 leading-none">{s.value}</p>
-                      <p className="text-[10px] md:text-xs font-mono tracking-widest text-zinc-500 uppercase mt-2">
+                      <s.icon size={16} className="mb-3 text-signal" aria-hidden />
+                      <p className="font-display text-3xl leading-none text-ink md:text-5xl">{s.value}</p>
+                      <p className="mt-2 font-mono text-[10px] font-bold tracking-widest text-ink-soft uppercase md:text-xs">
                         {s.label}
                       </p>
                     </>
                   ) : (
-                    <div className="h-16 animate-pulse rounded bg-white/5" />
+                    <div className="h-16 animate-pulse bg-ink/10" />
                   )}
                 </motion.div>
               );
             })}
           </div>
 
-          {/* Latest repos */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {(repos.length ? repos : Array.from({ length: 4 })).map((repo, i) => {
               const r = repo as Repo | undefined;
               return (
@@ -136,32 +122,26 @@ export default function GitHubActivity() {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: i * 0.08 }}
-                  className="group rounded-xl border border-white/5 bg-zinc-900/40 p-5 hover:border-cyber-lime/30 hover:bg-zinc-900/70 transition-colors"
+                  transition={{ duration: 0.5, delay: i * 0.08 }}
+                  className="group block border-2 border-ink bg-[#fffdf8] p-5 transition-all hover:-translate-y-1 hover:shadow-[5px_5px_0_#ff4d1c]"
                 >
                   {r ? (
                     <>
                       <div className="flex items-start justify-between gap-2">
-                        <p className="font-bold text-zinc-100 group-hover:text-cyber-lime transition-colors truncate">
-                          {r.name}
-                        </p>
+                        <p className="truncate font-display text-xl tracking-wide text-ink uppercase">{r.name}</p>
                         <ArrowUpRight
-                          size={16}
-                          className="shrink-0 text-zinc-600 group-hover:text-cyber-lime group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all"
+                          size={18}
+                          className="shrink-0 text-ink transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-signal"
                           aria-hidden
                         />
                       </div>
-                      <p className="text-xs text-zinc-500 mt-1.5 leading-relaxed line-clamp-2 min-h-8">
+                      <p className="mt-1.5 line-clamp-2 min-h-10 text-sm leading-relaxed text-ink-soft">
                         {r.description ?? "No description provided."}
                       </p>
-                      <div className="flex items-center gap-4 mt-4 font-mono text-[10px] tracking-wider text-zinc-500 uppercase">
+                      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-dashed border-ink pt-3 font-mono text-[10px] font-bold tracking-wider text-ink uppercase">
                         {r.language && (
                           <span className="inline-flex items-center gap-1.5">
-                            <span
-                              className="w-2 h-2 rounded-full"
-                              style={{ background: languageColors[r.language] ?? "#71717a" }}
-                              aria-hidden
-                            />
+                            <span className="h-2 w-2 rounded-full border border-ink bg-signal" aria-hidden />
                             {r.language}
                           </span>
                         )}
@@ -175,7 +155,7 @@ export default function GitHubActivity() {
                       </div>
                     </>
                   ) : (
-                    <div className="h-24 animate-pulse rounded bg-white/5" />
+                    <div className="h-24 animate-pulse bg-ink/10" />
                   )}
                 </motion.a>
               );
@@ -187,10 +167,10 @@ export default function GitHubActivity() {
               href={personal.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="group inline-flex items-center gap-2 text-sm font-semibold text-zinc-400 hover:text-cyber-lime transition-colors w-fit"
+              className="group inline-flex w-fit items-center gap-2 border-b-2 border-ink font-mono text-sm font-bold tracking-wider text-ink uppercase transition-colors hover:border-signal hover:text-signal"
             >
               All repositories
-              <ArrowUpRight size={15} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              <ArrowUpRight size={15} className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
             </a>
           </Magnetic>
         </div>

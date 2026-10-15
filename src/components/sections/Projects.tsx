@@ -1,151 +1,119 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Github } from "lucide-react";
+import { AnimatePresence, motion, useInView } from "framer-motion";
+import { ArrowUpRight, Github, Minus, Plus } from "lucide-react";
+import { useRef, useState } from "react";
 import Magnetic from "@/components/ui/Magnetic";
 import Section from "@/components/ui/Section";
-import ScrambleText from "@/components/ui/ScrambleText";
-import TiltCard from "@/components/ui/TiltCard";
+import ProjectCover from "@/components/sections/ProjectCovers";
 import { projects, type Project } from "@/data/portfolio";
 
-function ProjectCover({ project }: { project: Project }) {
+// One "blueprint sheet" per project. On lg+ the sheets pin and stack as you scroll.
+function Sheet({ project, index }: { project: Project; index: number }) {
+  const ref = useRef<HTMLElement>(null);
+  const drawn = useInView(ref, { once: true, margin: "0px 0px -20% 0px" });
+  const [open, setOpen] = useState(false);
+  const panelId = `details-${index}`;
+
   return (
-    <div
-      className="relative w-full h-full overflow-hidden transition-transform duration-[1200ms] ease-out group-hover:scale-[1.04]"
-      style={{
-        background: `radial-gradient(120% 120% at 15% 10%, ${project.accent}26 0%, transparent 45%), radial-gradient(120% 130% at 90% 90%, ${project.accent2}33 0%, transparent 55%), #09090b`,
-      }}
+    <article
+      ref={ref}
+      className="group/sheet relative border-[3px] border-ink bg-[#fffdf8] shadow-[8px_8px_0_#111] lg:sticky"
+      style={{ top: `${6 + index * 0.9}rem` }}
     >
-      {/* grid lines — brighten on hover */}
-      <div
-        className="absolute inset-0 opacity-[0.13] transition-opacity duration-700 group-hover:opacity-25"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
-          backgroundSize: "44px 44px",
-          maskImage: "radial-gradient(80% 80% at 50% 50%, black 30%, transparent 100%)",
-          WebkitMaskImage: "radial-gradient(80% 80% at 50% 50%, black 30%, transparent 100%)",
-        }}
-        aria-hidden
-      />
-      {/* giant monogram — drifts up on hover */}
-      <span
-        className="absolute -bottom-8 -right-2 text-[11rem] md:text-[13rem] font-black leading-none select-none tracking-tighter transition-transform duration-1000 ease-out group-hover:-translate-y-4 group-hover:-translate-x-2"
-        style={{ color: `${project.accent}1f`, WebkitTextStroke: `1px ${project.accent}40` }}
-        aria-hidden
-      >
-        {project.title.slice(0, 2)}
-      </span>
-      {/* content */}
-      <div className="absolute inset-0 p-6 md:p-8 flex flex-col justify-between" style={{ transform: "translateZ(30px)" }}>
-        <div className="flex items-center justify-between font-mono text-[10px] tracking-widest uppercase text-zinc-500">
-          <span className="inline-flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: project.accent }} />
-            {project.tagline}
+      {/* title block, like a drawing's corner stamp */}
+      <div className="flex items-center justify-between border-b-[3px] border-ink bg-paper-2 px-4 py-2 font-mono text-[10px] font-bold tracking-[0.2em] uppercase sm:text-xs">
+        <span className="whitespace-nowrap">Sheet {String(index + 1).padStart(2, "0")} / {String(projects.length).padStart(2, "0")}</span>
+        <span className="text-ink-soft">{project.tagline}</span>
+      </div>
+
+      <div className="grid gap-0 lg:grid-cols-12">
+        <div className="blueprint-grid relative border-b-[3px] border-ink p-5 lg:col-span-6 lg:border-r-[3px] lg:border-b-0">
+          <div className="aspect-[8/5] w-full transition-transform duration-500 group-hover/sheet:-rotate-1 group-hover/sheet:scale-[1.02]">
+            <ProjectCover title={project.title} drawn={drawn} />
+          </div>
+          <span className="absolute bottom-2 left-3 font-mono text-[9px] tracking-wider text-ink-soft uppercase">
+            Illustrated cover — not a screenshot
           </span>
-          <span>{project.tech[0]}</span>
         </div>
-        <div>
-          <p className="text-2xl md:text-3xl font-black tracking-tight text-zinc-100">{project.title}</p>
-          <div
-            className="mt-3 h-px w-full origin-left scale-x-50 transition-transform duration-700 ease-out group-hover:scale-x-100"
-            style={{ background: `linear-gradient(90deg, ${project.accent}80, transparent)` }}
-          />
-          <ul className="mt-3 space-y-1">
-            {project.features.slice(0, 2).map((f) => (
+
+        <div className="flex flex-col p-5 sm:p-7 lg:col-span-6">
+          <h3 className="font-display text-5xl leading-[0.95] tracking-tight text-ink uppercase sm:text-6xl">
+            {project.title}
+          </h3>
+          <p className="mt-2 font-hand text-2xl text-signal">{project.tagline}</p>
+          <p className="mt-4 text-sm leading-relaxed text-ink/80 sm:text-base">{project.description}</p>
+
+          <ul className="mt-5 flex flex-wrap gap-2" aria-label="Tech stack">
+            {project.tech.map((t) => (
               <li
-                key={f}
-                className="text-[11px] md:text-xs text-zinc-500 font-mono truncate transition-colors duration-500 group-hover:text-zinc-400"
+                key={t}
+                className="border-2 border-ink bg-paper px-2.5 py-0.5 font-mono text-xs font-bold tracking-wide uppercase"
               >
-                <span style={{ color: project.accent }}>▸</span> {f}
+                {t}
               </li>
             ))}
           </ul>
+
+          <AnimatePresence initial={false}>
+            {open && (
+              <motion.div
+                id={panelId}
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                className="overflow-hidden"
+              >
+                <ul className="mt-5 space-y-2 border-t-2 border-dashed border-ink pt-4">
+                  {project.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-sm leading-relaxed text-ink/80">
+                      <span className="mt-0.5 shrink-0 font-bold text-signal">▸</span>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div className="mt-auto flex flex-wrap items-center gap-3 pt-6">
+            <button
+              type="button"
+              onClick={() => setOpen((o) => !o)}
+              aria-expanded={open}
+              aria-controls={panelId}
+              className="inline-flex cursor-pointer items-center gap-2 border-2 border-ink bg-paper px-4 py-2 font-mono text-xs font-bold tracking-wider uppercase transition-colors hover:bg-ink hover:text-paper"
+            >
+              {open ? <Minus size={14} aria-hidden /> : <Plus size={14} aria-hidden />}
+              {open ? "Hide details" : "Details"}
+            </button>
+            <Magnetic strength={0.3}>
+              <a
+                href={project.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${project.title} on GitHub`}
+                className="inline-flex items-center gap-2 border-2 border-ink bg-signal px-4 py-2 font-mono text-xs font-bold tracking-wider text-ink uppercase shadow-[3px_3px_0_#111] transition-transform hover:-translate-y-0.5"
+              >
+                <Github size={14} aria-hidden />
+                View source
+                <ArrowUpRight size={14} aria-hidden />
+              </a>
+            </Magnetic>
+          </div>
         </div>
       </div>
-    </div>
+    </article>
   );
 }
 
 export default function Projects() {
   return (
     <Section id="projects" title="My Work" subtitle="Featured projects" index="04">
-      <div className="w-full mx-auto mt-4 md:mt-8 flex flex-col gap-16 md:gap-24">
+      <div className="flex flex-col gap-12 pb-4 lg:gap-24">
         {projects.map((project, i) => (
-          <motion.article
-            key={project.title}
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.8 }}
-            className="flex flex-col md:flex-row gap-8 md:gap-12 lg:gap-16 items-center justify-between w-full pb-16 md:pb-24 border-b border-zinc-800/40 last:border-0 last:pb-0"
-          >
-            {/* Text column */}
-            <div className="w-full md:w-1/2 flex flex-row items-start gap-3 md:gap-6">
-              <span className="text-4xl sm:text-5xl md:text-7xl font-black text-zinc-800/60 leading-none select-none font-mono" aria-hidden>
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <div className="flex flex-col flex-1">
-                <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-zinc-100 leading-tight cursor-default">
-                  <ScrambleText text={project.title} />
-                </h3>
-                <p className="text-xs sm:text-sm text-zinc-400 mt-1 md:mt-2 font-medium">{project.tagline}</p>
-
-                <span className="text-xs font-medium tracking-widest text-zinc-500 uppercase mt-6 md:mt-8 block">
-                  Overview
-                </span>
-                <p className="text-xs sm:text-sm text-zinc-500 mt-2 leading-relaxed">{project.description}</p>
-
-                <ul className="mt-4 space-y-1.5">
-                  {project.features.map((f) => (
-                    <li key={f} className="text-xs sm:text-sm text-zinc-500 leading-relaxed flex items-start gap-2">
-                      <span className="text-cyber-lime mt-0.5 shrink-0">▸</span>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="flex flex-wrap gap-1.5 mt-4">
-                  {project.tech.map((t) => (
-                    <span
-                      key={t}
-                      className="text-xs font-semibold bg-zinc-900/60 text-zinc-400 border border-zinc-800/80 px-2.5 py-0.5 rounded"
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="flex items-center gap-3 mt-6 md:mt-8">
-                  <Magnetic strength={0.3}>
-                    <a
-                      href={project.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`${project.title} on GitHub`}
-                      className="inline-flex items-center gap-2 text-sm font-semibold text-zinc-300 hover:text-cyber-lime transition-colors px-4 py-2 rounded-full border border-zinc-800 hover:border-cyber-lime/40 hover:bg-green-950/20"
-                    >
-                      <Github size={16} />
-                      View source
-                    </a>
-                  </Magnetic>
-                </div>
-              </div>
-            </div>
-
-            {/* Cover column */}
-            <div className="w-full md:w-1/2 flex items-center justify-center">
-              <TiltCard className="w-full">
-                <div
-                  className="block relative group overflow-hidden rounded-xl sm:rounded-2xl border border-white/5 bg-zinc-950/50 aspect-[16/10] shadow-2xl w-full"
-                  style={{ transformStyle: "preserve-3d" }}
-                >
-                  <ProjectCover project={project} />
-                  <div className="absolute inset-0 bg-zinc-950/10 group-hover:bg-transparent transition-colors duration-500" aria-hidden />
-                </div>
-              </TiltCard>
-            </div>
-          </motion.article>
+          <Sheet key={project.title} project={project} index={i} />
         ))}
       </div>
     </Section>

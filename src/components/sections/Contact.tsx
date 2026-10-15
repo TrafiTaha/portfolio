@@ -14,33 +14,32 @@ const socials = [
   { label: "WhatsApp", href: personal.whatsapp },
 ];
 
-const headingContainer = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.06 } },
+const headingContainer = { hidden: {}, visible: { transition: { staggerChildren: 0.06 } } };
+const wordReveal = {
+  hidden: { y: "110%" },
+  visible: { y: "0%", transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1] as const } },
 };
 
-const wordReveal = {
-  hidden: { y: "115%" },
-  visible: { y: "0%", transition: { duration: 0.9, ease: [0.76, 0, 0.24, 1] as const } },
-};
+const link =
+  "font-bold text-ink underline decoration-signal decoration-2 underline-offset-4 transition-colors hover:text-signal";
 
 export default function Contact() {
   return (
     <Section id="contact" title="Contact" subtitle="Let's build something together" index="06">
-      {/* Mega CTA */}
-      <div className="pt-10 pb-16 md:pt-16 md:pb-24">
+      <div className="pt-6 pb-16 md:pb-24">
+        {/* trigger on the container; masked words animate via variants */}
         <motion.h3
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "0px 0px -15% 0px" }}
           variants={headingContainer}
-          className="text-[11vw] sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter uppercase leading-[0.95] text-zinc-100 max-w-5xl"
+          className="max-w-6xl font-display text-[15vw] leading-[0.95] tracking-tight text-ink uppercase sm:text-8xl lg:text-[9rem]"
         >
-          {"The future is waiting — let's build it".split(" ").map((word, i) => (
-            <span key={i} className="inline-flex overflow-hidden pb-1 mr-[0.22em]">
+          {"Let's build something great".split(" ").map((word, i) => (
+            <span key={i} className="mr-[0.22em] inline-flex overflow-hidden pt-[0.05em] pb-[0.04em]">
               <motion.span
                 variants={wordReveal}
-                className={`inline-block ${i >= 5 ? "text-transparent [-webkit-text-stroke:1.5px_#22c55e]" : ""}`}
+                className={`inline-block ${i >= 2 ? "text-transparent [-webkit-text-stroke:2px_#111]" : ""}`}
               >
                 {word}
               </motion.span>
@@ -48,75 +47,49 @@ export default function Contact() {
           ))}
         </motion.h3>
 
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          className="flex flex-wrap items-center gap-6 mt-10 md:mt-14"
-        >
+        <div className="mt-10 flex flex-wrap items-center gap-6 md:mt-14">
           <Magnetic strength={0.25}>
             <a
               href={personal.whatsapp}
               target="_blank"
               rel="noopener noreferrer"
-              className="group inline-flex items-center gap-3 rounded-full bg-cyber-lime text-zinc-950 font-black text-base md:text-lg px-8 py-4 md:px-10 md:py-5 hover:bg-zinc-100 transition-colors duration-300"
+              className="group inline-flex items-center gap-3 border-[3px] border-ink bg-signal px-8 py-4 font-display text-2xl tracking-wide text-ink uppercase shadow-[6px_6px_0_#111] transition-transform hover:-translate-y-1 md:px-10 md:py-5 md:text-3xl"
             >
-              Let&apos;s Talk
-              <ArrowUpRight size={20} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              Let&apos;s talk
+              <ArrowUpRight size={26} className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden />
             </a>
           </Magnetic>
-          <span className="font-mono text-xs tracking-widest text-zinc-500 uppercase">
-            {personal.whatsappNumber} — WhatsApp, anytime
+          <span className="font-mono text-xs font-bold tracking-widest text-ink-soft uppercase">
+            {personal.whatsappNumber} · WhatsApp, anytime
           </span>
-        </motion.div>
+        </div>
       </div>
 
-      {/* Footer columns */}
-      <div className="w-full flex flex-col md:flex-row gap-10 md:gap-8 items-start pt-12 border-t border-zinc-800/80">
-        <div className="w-full md:w-1/2 flex flex-col gap-8">
-          <div className="flex flex-col">
-            <span className="text-xs font-mono font-semibold tracking-widest text-zinc-500 uppercase mb-1">
-              Location
-            </span>
-            <span className="text-sm md:text-base text-zinc-200 font-semibold">
-              {personal.location} (Remote-friendly)
-            </span>
+      <div className="grid gap-10 border-t-[3px] border-ink pt-10 md:grid-cols-12 md:gap-8">
+        <div className="flex flex-col gap-6 md:col-span-6">
+          <div>
+            <span className="mb-1 block font-mono text-xs font-bold tracking-widest text-ink-soft uppercase">Location</span>
+            <span className="text-base font-semibold text-ink">{personal.location} (Remote-friendly)</span>
           </div>
-          <p className="text-sm md:text-base text-zinc-400 leading-relaxed max-w-md">
+          <p className="max-w-md text-base leading-relaxed text-ink/80">
             Message me on{" "}
-            <a
-              href={personal.whatsapp}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-cyber-lime hover:text-green-300 font-semibold transition-colors"
-            >
+            <a href={personal.whatsapp} target="_blank" rel="noopener noreferrer" className={link}>
               WhatsApp
             </a>{" "}
             or{" "}
-            <a
-              href={personal.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-cyber-lime hover:text-green-300 font-semibold transition-colors"
-            >
+            <a href={personal.linkedin} target="_blank" rel="noopener noreferrer" className={link}>
               LinkedIn
             </a>
             . For code, issues and collaboration, find me on{" "}
-            <a
-              href={personal.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-cyber-lime hover:text-green-300 font-semibold transition-colors"
-            >
+            <a href={personal.github} target="_blank" rel="noopener noreferrer" className={link}>
               GitHub
             </a>
             .
           </p>
         </div>
 
-        <div className="w-full sm:w-1/2 md:w-1/4 flex flex-col md:pl-10">
-          <span className="text-xs font-mono font-semibold tracking-widest text-zinc-500 uppercase mb-4">Social</span>
+        <div className="md:col-span-3">
+          <span className="mb-4 block font-mono text-xs font-bold tracking-widest text-ink-soft uppercase">Social</span>
           <div className="flex flex-col gap-3">
             {socials.map((s) => (
               <Magnetic key={s.label} strength={0.3} className="w-fit">
@@ -124,28 +97,24 @@ export default function Contact() {
                   href={s.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group text-base md:text-lg text-zinc-200 hover:text-cyber-lime font-semibold transition-colors w-fit border-b border-zinc-800 hover:border-cyber-lime/50 pb-0.5 inline-flex items-center"
+                  className="group inline-flex w-fit items-center border-b-2 border-ink pb-0.5 font-display text-2xl tracking-wide text-ink uppercase transition-colors hover:border-signal hover:text-signal"
                 >
                   {s.label}
-                  <ArrowUpRight
-                    className="inline-block ml-1 group-hover:translate-x-1 transition-all duration-300"
-                    size={19}
-                    aria-hidden
-                  />
+                  <ArrowUpRight className="ml-1 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-1" size={20} aria-hidden />
                 </a>
               </Magnetic>
             ))}
           </div>
         </div>
 
-        <div className="w-full sm:w-1/2 md:w-1/4 flex flex-col justify-between h-full md:text-right gap-6 md:gap-0">
+        <div className="flex flex-col justify-between gap-6 md:col-span-3 md:text-right">
           <div>
-            <p className="text-sm md:text-base text-zinc-300 font-semibold leading-relaxed">Designed and developed</p>
-            <p className="text-sm md:text-base text-zinc-200 font-bold leading-relaxed">
-              by <span className="text-cyber-lime">{personal.name}</span>
+            <p className="font-hand text-2xl text-ink">Drawn and built</p>
+            <p className="text-base font-bold text-ink">
+              by <span className="text-signal">{personal.name}</span>
             </p>
           </div>
-          <p className="text-xs md:text-sm text-zinc-500 font-mono font-semibold tracking-wider md:mt-24 flex flex-row items-center md:justify-end gap-1">
+          <p className="flex items-center gap-1 font-mono text-xs font-bold tracking-wider text-ink-soft md:justify-end">
             <Copyright size={14} aria-hidden /> {new Date().getFullYear()}
           </p>
         </div>

@@ -17,51 +17,62 @@ const links = [
 ];
 
 export default function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
+  const [active, setActive] = useState<string>("");
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    const els = links.map((l) => document.getElementById(l.id)).filter((e): e is HTMLElement => !!e);
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) setActive(e.target.id);
+        });
+      },
+      { rootMargin: "-40% 0px -55% 0px" }
+    );
+    els.forEach((el) => io.observe(el));
+    const top = () => window.scrollY < 200 && setActive("");
+    window.addEventListener("scroll", top, { passive: true });
+    return () => {
+      io.disconnect();
+      window.removeEventListener("scroll", top);
+    };
   }, []);
 
-  const scrollTo = (e: React.MouseEvent, id: string) => {
+  const go = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
     scrollToTarget(`#${id}`, -70);
   };
 
   return (
     <motion.header
-      initial={{ y: -80, opacity: 0 }}
+      initial={{ y: -60, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.7, ease: [0.76, 0, 0.24, 1], delay: 0.2 }}
-      className="fixed top-0 inset-x-0 z-50 flex justify-center px-4 pt-4"
+      transition={{ duration: 0.5, ease: [0.76, 0, 0.24, 1] }}
+      className="fixed inset-x-0 top-0 z-50 flex justify-center px-3 pt-14 sm:px-4 lg:pt-4"
     >
       <nav
-        className={`flex items-center gap-1 sm:gap-2 rounded-full border px-3 sm:px-5 py-2 transition-all duration-500 ${
-          scrolled
-            ? "border-white/10 bg-zinc-950/70 backdrop-blur-xl shadow-2xl shadow-black/40"
-            : "border-transparent bg-transparent"
-        }`}
+        className="flex max-w-full items-center gap-1 rounded-full border-2 border-ink bg-paper px-2 py-1.5 shadow-[3px_3px_0_#111] sm:gap-2 sm:px-4"
         aria-label="Primary navigation"
       >
         <button
           type="button"
           onClick={() => scrollToTarget(0)}
-          className="font-mono text-sm font-bold tracking-tight text-zinc-100 hover:text-cyber-lime transition-colors pr-2 sm:pr-4 cursor-pointer"
+          className="cursor-pointer pr-2 font-display text-lg leading-none tracking-wide text-ink hover:text-signal sm:pr-3"
           aria-label="Back to top"
         >
-          TBR<span className="text-cyber-lime">.</span>
+          TBR<span className="text-signal">.</span>
         </button>
 
-        <ul className="hidden md:flex items-center gap-1">
+        <ul className="flex min-w-0 items-center gap-0.5 overflow-x-auto [scrollbar-width:none]">
           {links.map((link) => (
-            <li key={link.id}>
+            <li key={link.id} className="shrink-0">
               <a
                 href={`#${link.id}`}
-                onClick={(e) => scrollTo(e, link.id)}
-                className="px-3 py-1.5 text-xs font-semibold tracking-wide text-zinc-400 uppercase rounded-full hover:text-zinc-100 hover:bg-white/5 transition-colors inline-flex"
+                onClick={(e) => go(e, link.id)}
+                aria-current={active === link.id ? "true" : undefined}
+                className={`inline-flex rounded-full px-2.5 py-1 font-mono text-[10px] font-bold tracking-wide uppercase transition-colors sm:px-3 sm:text-xs ${
+                  active === link.id ? "bg-signal text-ink" : "text-ink hover:bg-ink hover:text-paper"
+                }`}
               >
                 {link.label}
               </a>
@@ -69,7 +80,7 @@ export default function Navbar() {
           ))}
         </ul>
 
-        <div className="flex items-center gap-1 pl-2 sm:pl-4 border-l border-white/10">
+        <div className="hidden items-center gap-0.5 border-l-2 border-ink pl-3 lg:flex">
           {(
             [
               { href: personal.github, label: "GitHub profile", Icon: Github },
@@ -84,7 +95,7 @@ export default function Navbar() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={label}
-                className="p-2 text-zinc-400 hover:text-zinc-100 transition-colors inline-flex"
+                className="inline-flex p-1.5 text-ink transition-colors hover:text-signal"
               >
                 <Icon size={16} />
               </a>
