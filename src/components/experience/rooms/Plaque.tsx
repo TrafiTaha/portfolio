@@ -13,8 +13,10 @@ export default function Plaque({
   tech,
   meta,
   cta,
+  secondary,
   onClose,
 }: {
+  secondary?: { href: string; label: string };
   kicker: string;
   title: string;
   sub?: string;
@@ -89,6 +91,17 @@ export default function Plaque({
                 ))}
               </ul>
             </>
+          )}
+          {secondary && (
+            <a
+              href={secondary.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 flex w-full items-center justify-center gap-2 border-[3px] border-ink bg-paper px-6 py-3 font-mono text-sm font-bold tracking-wider text-ink uppercase hover:bg-ink hover:text-paper"
+            >
+              {secondary.label}
+              <ArrowUpRight size={16} aria-hidden />
+            </a>
           )}
           {cta && (
             <a

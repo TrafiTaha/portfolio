@@ -86,7 +86,60 @@ function BoardCover({ drawn }: { drawn: boolean }) {
   );
 }
 
-export default function ProjectCover({ title, drawn }: { title: string; drawn: boolean }) {
+const LANG_COLOR: Record<string, string> = {
+  JavaScript: "#f7df1e",
+  TypeScript: "#3178c6",
+  PHP: "#8892bf",
+  Blade: "#ff2d20",
+  HTML: "#e34c26",
+  CSS: "#563d7c",
+  Dart: "#00b4ab",
+  Python: "#3572a5",
+  Kotlin: "#a97bff",
+  Java: "#b07219",
+};
+
+const hash = (s: string) => {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
+  return h >>> 0;
+};
+
+// Deterministic original cover for any repo: a terminal window whose lines, bars and badge come from the name,
+// with the language's colour as its accent. No invented content; the label is just the repo name.
+function RepoCover({ title, language, drawn }: { title: string; language: string | null; drawn: boolean }) {
+  const h = hash(title);
+  const accent = (language && LANG_COLOR[language]) || "#ff4d1c";
+  const lines = 4 + (h % 3);
+  const bars = 4 + ((h >> 3) % 3);
+  const shape = (h >> 6) % 3;
+  return (
+    <Frame drawn={drawn} label={`Illustrated cover for ${title}`}>
+      <rect x="40" y="36" width="400" height="228" fill="#fffdf8" />
+      <path d="M40 72h400" />
+      <circle cx="62" cy="54" r="6" fill="#ff4d1c" />
+      <circle cx="84" cy="54" r="6" />
+      <circle cx="106" cy="54" r="6" />
+      {Array.from({ length: lines }, (_, i) => {
+        const w = 70 + ((h >> (i + 2)) % 120);
+        return <path key={i} d={`M62 ${98 + i * 24}h${w}`} strokeWidth={2.6} />;
+      })}
+      {Array.from({ length: bars }, (_, i) => {
+        const bh = 20 + ((h >> (i * 2)) % 60);
+        return <path key={`b${i}`} d={`M${290 + i * 22} 240v-${bh}`} strokeWidth={10} stroke={accent} />;
+      })}
+      {shape === 0 && <circle cx="360" cy="120" r="26" fill={accent} />}
+      {shape === 1 && <path d="M334 146l26-48 26 48z" fill={accent} />}
+      {shape === 2 && <rect x="334" y="94" width="52" height="52" fill={accent} />}
+      <path d="M62 246h150" strokeDasharray="6 8" className="keep" strokeWidth={2} />
+    </Frame>
+  );
+}
+
+const CURATED = new Set(["AlphaDocTN", "Agrisdol", "WorkSphere"]);
+
+export default function ProjectCover({ title, drawn, language = null }: { title: string; drawn: boolean; language?: string | null }) {
+  if (!CURATED.has(title)) return <RepoCover title={title} language={language} drawn={drawn} />;
   if (title === "Agrisdol") return <FieldCover drawn={drawn} />;
   if (title === "WorkSphere") return <BoardCover drawn={drawn} />;
   return <DocCover drawn={drawn} />;

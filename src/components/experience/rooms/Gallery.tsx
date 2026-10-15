@@ -2,11 +2,10 @@
 
 import { AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import Image from "next/image";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import Plaque from "@/components/experience/rooms/Plaque";
 import ProjectCover from "@/components/sections/ProjectCovers";
-import { certificates, projects } from "@/data/portfolio";
+import { useProjects } from "@/lib/useRepos";
 
 const mod = (a: number, n: number) => ((a % n) + n) % n;
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
@@ -234,7 +233,11 @@ function Rail({
   );
 }
 
+const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("en", { year: "numeric", month: "short", day: "numeric" });
+
+// Drafting wall: every public repo (curated three first) hangs as a blueprint sheet.
 export function ProjectsGallery() {
+  const { projects, status } = useProjects();
   const items: Item[] = projects.map((p) => ({
     key: p.title,
     label: p.title,
@@ -242,17 +245,23 @@ export function ProjectsGallery() {
     aria: `Inspect ${p.title}`,
     cover: (
       <span className="blueprint-grid block aspect-[8/5] w-full border-2 border-ink">
-        <ProjectCover title={p.title} drawn />
+        <ProjectCover title={p.title} drawn language={p.language} />
       </span>
     ),
   }));
+  const note =
+    status === "loading" ? " · loading all repositories…" : status === "error" ? " · GitHub unreachable, showing curated projects" : ` · ${projects.length} repositories`;
   return (
     <Rail
       items={items}
       theme="pegboard"
-      hint="Drafting wall: scroll to slide the sheets, click one to inspect"
+      hint={`Drafting wall: scroll to slide the sheets, click one to inspect${note}`}
       plaque={(i, close) => {
-        const p = projects[i];
+        const p = projects[i % projects.length];
+        const meta = [
+          ...(p.stars !== null ? [`★ ${p.stars}`] : []),
+          ...(p.pushed ? [`Last pushed ${fmtDate(p.pushed)}`] : []),
+        ];
         return (
           <Plaque
             key={p.title}
@@ -260,65 +269,23 @@ export function ProjectsGallery() {
             title={p.title}
             sub={p.tagline}
             tech={p.tech}
+            meta={meta}
             cta={{ href: p.github, label: "Open project" }}
+            secondary={p.homepage ? { href: p.homepage, label: "Live demo" } : undefined}
             onClose={close}
           >
-            <p>{p.description}</p>
-            <ul className="mt-3 space-y-1.5">
-              {p.features.map((f) => (
-                <li key={f} className="flex items-start gap-2">
-                  <span className="font-bold text-signal">▸</span>
-                  {f}
-                </li>
-              ))}
-            </ul>
-            <p className="mt-3 font-mono text-[10px] tracking-wider text-ink-soft uppercase">
-              Illustrated cover, not a screenshot
-            </p>
-          </Plaque>
-        );
-      }}
-    />
-  );
-}
-
-export function CertificatesGallery() {
-  const items: Item[] = certificates.map((c) => ({
-    key: c.title,
-    label: c.title,
-    sub: c.issuer,
-    aria: `Inspect ${c.title} certificate`,
-    cover: c.image ? (
-      <span className="relative block aspect-[1.414/1] w-full overflow-hidden border-2 border-ink bg-white">
-        <Image src={c.image} alt={`${c.title} certificate`} fill loading="eager" className="object-cover" sizes="300px" />
-      </span>
-    ) : (
-      <span className="hatch flex aspect-[1.414/1] w-full items-center justify-center border-2 border-ink font-mono text-xs font-bold tracking-widest text-signal uppercase">
-        Academic license
-      </span>
-    ),
-  }));
-  return (
-    <Rail
-      items={items}
-      theme="cork"
-      hint="Corkboard: scroll to slide the cord, click a certificate to inspect"
-      plaque={(i, close) => {
-        const c = certificates[i];
-        return (
-          <Plaque
-            key={c.title}
-            kicker="Certificate details"
-            title={c.title}
-            sub={c.issuer}
-            meta={[c.duration, c.date]}
-            onClose={close}
-          >
-            {c.image && (
-              <span className="relative block aspect-[1.414/1] w-full border-2 border-ink bg-white">
-                <Image src={c.image} alt={`${c.title} certificate`} fill loading="eager" className="object-contain" sizes="(max-width: 768px) 90vw, 42rem" />
-              </span>
+            <p>{p.description ?? `${p.language ?? "Repository"} · no description yet`}</p>
+            {p.features.length > 0 && (
+              <ul className="mt-3 space-y-1.5">
+                {p.features.map((f) => (
+                  <li key={f} className="flex items-start gap-2">
+                    <span className="font-bold text-signal">▸</span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
             )}
+            <p className="mt-3 font-mono text-[10px] tracking-wider text-ink-soft uppercase">Illustrated cover, not a screenshot</p>
           </Plaque>
         );
       }}

@@ -3,7 +3,10 @@ import { Award, Boxes, Github, Images, Send, User, type LucideIcon } from "lucid
 import type { ComponentType } from "react";
 import About from "@/components/sections/About";
 import AboutRoom from "@/components/experience/rooms/AboutRoom";
-import { CertificatesGallery, ProjectsGallery } from "@/components/experience/rooms/Gallery";
+import CertificatesCase from "@/components/experience/rooms/CertificatesCase";
+import ContactRoom from "@/components/experience/rooms/ContactRoom";
+import { ProjectsGallery } from "@/components/experience/rooms/Gallery";
+import GithubRoom from "@/components/experience/rooms/GithubRoom";
 import SkillsTunnel from "@/components/experience/rooms/SkillsTunnel";
 
 const Skills = dynamic(() => import("@/components/sections/Skills"));
@@ -27,9 +30,9 @@ export const DOORS: DoorDef[] = [
   { id: "projects", title: "Projects", line: "Three things I built, end to end.", Icon: Images, scroll: false, Room: ProjectsGallery },
   { id: "about", title: "About", line: "Who is behind the desk.", Icon: User, scroll: true, Room: AboutRoom },
   { id: "skills", title: "Skills", line: "The tools floating around the studio.", Icon: Boxes, scroll: false, Room: SkillsTunnel },
-  { id: "certificates", title: "Certificates", line: "The paper trail, pinned up.", Icon: Award, scroll: false, Room: CertificatesGallery },
-  { id: "github", title: "GitHub", line: "Live from the source.", Icon: Github, scroll: true, Room: GitHubActivity },
-  { id: "contact", title: "Contact", line: "Knock, and say hello.", Icon: Send, scroll: true, Room: Contact },
+  { id: "certificates", title: "Certificates", line: "The paper trail, pinned up.", Icon: Award, scroll: true, Room: CertificatesCase },
+  { id: "github", title: "GitHub", line: "Live from the source.", Icon: Github, scroll: true, Room: GithubRoom },
+  { id: "contact", title: "Contact", line: "Knock, and say hello.", Icon: Send, scroll: true, Room: ContactRoom },
 ];
 
 // Classic long page sections (unchanged)
