@@ -12,6 +12,23 @@ export default function InkDefs() {
           <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="2" result="n" />
           <feDisplacementMap in="SourceGraphic" in2="n" scale="2" xChannelSelector="R" yChannelSelector="G" />
         </filter>
+        {/* #ink: wobble + slight bleed (blur then re-tighten alpha) + a faint offset duplicate stroke, like a print pass */}
+        <filter id="ink" x="-6%" y="-6%" width="112%" height="112%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="2" result="n" />
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="2" xChannelSelector="R" yChannelSelector="G" result="w" />
+          <feGaussianBlur in="w" stdDeviation="0.45" result="b" />
+          <feComponentTransfer in="b" result="bleed">
+            <feFuncA type="linear" slope="2.2" intercept="-0.25" />
+          </feComponentTransfer>
+          <feOffset in="w" dx="0.9" dy="0.7" result="off" />
+          <feComponentTransfer in="off" result="dup">
+            <feFuncA type="linear" slope="0.35" />
+          </feComponentTransfer>
+          <feMerge>
+            <feMergeNode in="dup" />
+            <feMergeNode in="bleed" />
+          </feMerge>
+        </filter>
       </defs>
     </svg>
   );

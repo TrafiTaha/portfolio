@@ -198,12 +198,16 @@ function Rail({
             style={{ top: ropeY, width: PW, marginLeft: -PW / 2, visibility: "hidden" }}
           >
             <span aria-hidden className="absolute -top-2 left-1/2 z-10 h-5 w-3 -translate-x-1/2 rounded-sm border-2 border-ink bg-signal" />
-            <span className="relative mt-3 block border-[3px] border-ink bg-[#fffdf8] p-2 shadow-[5px_5px_0_#111] transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-[5px_5px_0_#ff4d1c] group-focus-visible:-translate-y-1">
+            <span className="tex-paper-bg relative mt-3 block border-[3px] border-ink bg-[#fffdf8] p-2 shadow-[5px_5px_0_#111,0_22px_26px_rgba(20,12,4,.28)] transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-[5px_5px_0_#ff4d1c,0_26px_30px_rgba(20,12,4,.3)] group-focus-visible:-translate-y-1">
               {theme === "pegboard" && (
                 <>
                   {/* washi-tape corners */}
-                  <span aria-hidden className="absolute -top-2 -left-4 z-10 h-4 w-12 -rotate-[38deg] border border-ink/30 bg-[#ffe27a]/85" />
-                  <span aria-hidden className="absolute -top-2 -right-4 z-10 h-4 w-12 rotate-[38deg] border border-ink/30 bg-signal/70" />
+                  <span aria-hidden className="washi-wrap absolute -top-2 -left-4 z-10 -rotate-[38deg] skew-x-3">
+                    <span className="washi block h-4 w-12 bg-[#ffe27a]/90" />
+                  </span>
+                  <span aria-hidden className="washi-wrap absolute -top-2 -right-4 z-10 rotate-[38deg] -skew-x-3">
+                    <span className="washi block h-4 w-12 bg-signal/75" />
+                  </span>
                 </>
               )}
               {it.cover}

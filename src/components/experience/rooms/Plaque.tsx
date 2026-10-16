@@ -51,7 +51,7 @@ export default function Plaque({
         animate={{ y: 0, rotate: 0, scale: 1 }}
         exit={{ y: 20, opacity: 0 }}
         transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-        className="relative my-auto w-full max-w-2xl border-[4px] border-ink bg-paper shadow-[10px_10px_0_#ff4d1c]"
+        className="tex-paper-bg relative my-auto w-full max-w-2xl border-[4px] border-ink bg-paper shadow-[10px_10px_0_#ff4d1c,0_30px_50px_rgba(20,12,4,.4)]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between bg-ink px-4 py-2 text-paper">

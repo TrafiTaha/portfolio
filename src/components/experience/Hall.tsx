@@ -4,6 +4,7 @@ import { AnimatePresence, animate, motion, useMotionValue } from "framer-motion"
 import { ArrowDown, ArrowLeft, ArrowUp, DoorOpen, Menu, X } from "lucide-react";
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type Ref } from "react";
 import { DOORS } from "@/components/experience/doors";
+import Motes from "@/components/experience/Motes";
 
 const N = DOORS.length;
 const mod = (a: number, n: number) => ((a % n) + n) % n;
@@ -26,7 +27,7 @@ function Art({ v }: { v: number }) {
   ];
   return (
     <svg viewBox="0 0 120 100" className="h-full w-full" aria-hidden>
-      <g {...G} filter="url(#wobble-lg)">
+      <g {...G} filter="url(#ink)">
         <rect x="4" y="4" width="112" height="92" fill="#fffdf8" />
         <rect x="11" y="11" width="98" height="78" strokeWidth={1.6} />
         {art[v % 6]}
@@ -39,7 +40,7 @@ function Art({ v }: { v: number }) {
 function Lamp() {
   return (
     <svg viewBox="0 0 100 130" className="h-full w-full overflow-visible" aria-hidden>
-      <g {...G} filter="url(#wobble-lg)">
+      <g {...G} filter="url(#ink)">
         <path d="M50 0v52" />
         <path d="M22 98q0-46 28-46t28 46z" fill="#fffdf8" />
         <circle cx="50" cy="104" r="9" fill="#ff4d1c" />
@@ -52,11 +53,18 @@ function Lamp() {
 function DoorPanelArt() {
   return (
     <svg viewBox="0 0 100 200" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" aria-hidden>
-      <g {...G} strokeWidth={2.6} filter="url(#wobble-lg)">
+      <g {...G} strokeWidth={2.8} filter="url(#ink)">
         <rect x="14" y="14" width="72" height="74" />
+        <rect x="19" y="19" width="62" height="64" strokeWidth={1.2} />
         <rect x="14" y="108" width="72" height="78" />
+        <rect x="19" y="113" width="62" height="68" strokeWidth={1.2} />
+        {/* graphite shading in the lower-left of each recess */}
+        <path d="M22 80l14-14M22 70l8-8M22 60l4-4M22 178l20-22M22 166l12-14M22 154l6-6" strokeWidth={0.8} opacity={0.5} />
         <circle cx="84" cy="102" r="5" fill="#ff4d1c" />
       </g>
+      {/* pencil smudges */}
+      <ellipse cx="30" cy="150" rx="18" ry="10" fill="#111" opacity={0.06} style={{ filter: "blur(4px)" }} />
+      <ellipse cx="74" cy="104" rx="10" ry="6" fill="#111" opacity={0.08} style={{ filter: "blur(3px)" }} />
     </svg>
   );
 }
@@ -84,6 +92,9 @@ export default function Hall({
   const p = useMotionValue(0);
   const centerMv = useMotionValue(0); // 0 = door on its wall, 1 = centred in front of the camera
   const [menu, setMenu] = useState(false);
+  const sceneRef = useRef<HTMLDivElement>(null);
+  const bob = useRef({ t: 0, pv: 0, v: 0 });
+  const vel = useRef(0);
   const segs = useRef<(HTMLDivElement | null)[]>([]);
   const doorEls = useRef<(HTMLDivElement | null)[]>([]);
   const snap = useRef(0);
@@ -118,6 +129,22 @@ export default function Hall({
   /* ----- per-frame camera: writes transforms straight to the DOM ----- */
   const apply = useCallback((pv: number) => {
     const { D, HW } = geoRef.current;
+    // tiny head-bob / sway tied to camera speed (transform only; zero for reduced motion and when stopped)
+    const scene = sceneRef.current;
+    if (scene) {
+      const now = performance.now();
+      const b = bob.current;
+      const dtm = now - b.t;
+      if (dtm > 0 && dtm < 120) b.v = b.v * 0.8 + ((pv - b.pv) / (dtm / 1000)) * 0.2;
+      else if (dtm >= 120) b.v = 0;
+      b.t = now;
+      b.pv = pv;
+      const settled = Math.abs(pv - Math.round(pv)) < 0.002;
+      const amp = reducedRef.current || settled ? 0 : clamp01(Math.abs(b.v) / 2.5) * 2.6;
+      scene.style.transform = amp
+        ? `translate3d(${Math.sin(pv * Math.PI * 3) * amp * 0.7}px,${Math.sin(pv * Math.PI * 6) * amp}px,0) rotate(${Math.sin(pv * Math.PI * 3) * amp * 0.03}deg)`
+        : "";
+    }
     for (let k = 0; k < N; k++) {
       const seg = segs.current[k];
       const door = doorEls.current[k];
@@ -140,6 +167,12 @@ export default function Hall({
       }
       door.style.transform = `translate3d(${x}px,0,0) rotateY(${yaw}deg)`;
       door.style.setProperty("--o", String(clamp01((d + 0.85) / 0.4) * far));
+      // depth of field: only distant doors soften (quantised so the filter rarely changes); near ones stay sharp
+      const blur = openRef.current === k ? 0 : Math.round(Math.min(1.6, Math.max(0, (d - 1.4) * 0.55)) * 4) / 4;
+      if (door.dataset.b !== String(blur)) {
+        door.dataset.b = String(blur);
+        door.style.filter = blur ? `blur(${blur}px)` : "";
+      }
     }
   }, [centerMv]);
 
@@ -191,17 +224,20 @@ export default function Hall({
       }
       if (raf.current) return;
       last.current = performance.now();
+      // slightly underdamped spring (w=10, zeta=0.78): eases in, overshoots a hair and settles when stopping at a door
       const loop = (now: number) => {
-        const dt = Math.min(0.05, (now - last.current) / 1000);
+        const dt = Math.min(0.033, (now - last.current) / 1000);
         last.current = now;
         const cur = p.get();
         const diff = target.current - cur;
-        if (Math.abs(diff) < 0.0008) {
+        if (Math.abs(diff) < 0.0008 && Math.abs(vel.current) < 0.01) {
           p.set(target.current);
+          vel.current = 0;
           raf.current = 0;
           return;
         }
-        p.set(cur + diff * (1 - Math.exp(-dt * 9)));
+        vel.current += (100 * diff - 15.6 * vel.current) * dt;
+        p.set(cur + vel.current * dt);
         raf.current = requestAnimationFrame(loop);
       };
       raf.current = requestAnimationFrame(loop);
@@ -264,6 +300,7 @@ export default function Hall({
         window.clearTimeout(idle.current);
         busy.current = false;
         gBase.current = null;
+        vel.current = 0;
         wheelG.current.block = performance.now() + 700;
         snap.current = idx;
         p.set(reducedRef.current ? idx : idx - 0.9);
@@ -435,7 +472,7 @@ export default function Hall({
       >
         {/* 3D corridor */}
         <div className="absolute inset-0" style={{ perspective: `${P}px`, perspectiveOrigin: "50% 46%" }} aria-hidden>
-          <div className="absolute inset-0 [transform-style:preserve-3d]">
+          <div ref={sceneRef} className="absolute inset-0 [transform-style:preserve-3d]">
             {DOORS.map((door, k) => {
               const side = k % 2 === 0 ? -1 : 1;
               return (
@@ -460,13 +497,23 @@ export default function Hall({
                       background: `repeating-linear-gradient(180deg, rgba(17,17,17,.3) 0 2px, transparent 2px ${D / 5}px), repeating-linear-gradient(90deg, rgba(17,17,17,.4) 0 2px, transparent 2px ${(2 * HW) / 16}px), #e4ded0`,
                     }}
                   >
+                    <div className="tex-wood absolute inset-0 opacity-60" />
                     <div
-                      className="absolute border-[3px] border-ink bg-[#fffdf8]"
+                      className="absolute border-[3px] border-ink bg-[#fffdf8] shadow-[0_0_14px_rgba(20,12,4,.35)]"
                       style={{ width: Wd * 1.7, left: `calc(50% - ${Wd * 0.85}px)`, top: "3%", height: "94%" }}
                     >
+                      <div className="tex-paper absolute inset-0 opacity-80" />
                       <div className="absolute inset-[7%] border-2 border-dashed border-ink" />
                       <div className="absolute inset-y-[7%] left-1/2 w-[18%] -translate-x-1/2 bg-signal/90" />
                     </div>
+                    {/* ambient occlusion where the floor meets the walls, and the warm pool under the pendant lamp */}
+                    <div
+                      className="pointer-events-none absolute inset-0"
+                      style={{
+                        background:
+                          "linear-gradient(90deg, rgba(25,14,4,.34), transparent 13%, transparent 87%, rgba(25,14,4,.34)), radial-gradient(ellipse 34% 46% at 50% 50%, rgba(255,205,140,.5), rgba(255,205,140,.16) 48%, transparent 72%)",
+                      }}
+                    />
                   </div>
                   {/* ceiling + beam */}
                   <div
@@ -480,7 +527,16 @@ export default function Hall({
                       transform: `translate3d(0,${-CH}px,${D / 2}px) rotateX(-90deg)`,
                       background: "#efeade",
                     }}
-                  />
+                  >
+                    <div className="tex-paper absolute inset-0" />
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        background:
+                          "linear-gradient(90deg, rgba(25,14,4,.28), transparent 14%, transparent 86%, rgba(25,14,4,.28)), radial-gradient(ellipse 30% 40% at 50% 50%, rgba(255,214,160,.6), transparent 70%)",
+                      }}
+                    />
+                  </div>
                   {/* walls with wainscot + art */}
                   {[-1, 1].map((sd) => (
                     <div
@@ -496,7 +552,16 @@ export default function Hall({
                         background: "#ece7db",
                       }}
                     >
+                      <div className="tex-paper absolute inset-0" />
                       <div className="hatch absolute inset-x-0 bottom-0 h-[26%] border-t-[3px] border-ink opacity-70" />
+                      {/* ambient occlusion at ceiling and floor lines + lamp spill on the wall */}
+                      <div
+                        className="pointer-events-none absolute inset-0"
+                        style={{
+                          background:
+                            "linear-gradient(rgba(25,14,4,.34), transparent 16%, transparent 80%, rgba(25,14,4,.4)), radial-gradient(ellipse 36% 55% at 50% 12%, rgba(255,205,140,.4), transparent 70%)",
+                        }}
+                      />
                       <div className="absolute border-l-2 border-ink/50" style={{ left: 0, top: 0, bottom: 0 }} />
                       <div className="absolute" style={{ left: "31%", top: "16%", width: "38%", height: `${D * 0.38 * (100 / 120)}px` }}>
                         <Art v={sd === -1 ? k : k + 3} />
@@ -510,7 +575,7 @@ export default function Hall({
                       {sd === (k % 2 === 0 ? 1 : -1) && (
                         <div className="absolute bottom-0" style={{ left: "62%", width: "22%", height: "46%" }}>
                           <svg viewBox="0 0 100 100" className="h-full w-full overflow-visible" aria-hidden>
-                            <g {...G} strokeWidth={2.5} filter="url(#wobble-lg)">
+                            <g {...G} strokeWidth={2.5} filter="url(#ink)">
                               <path d="M8 56h84M14 56v44M86 56v44M14 74h72" />
                               <path d="M50 56V36M50 46l-12-8M50 42l12-10M50 38v-14" />
                               <path d="M42 56l2-8h12l2 8" fill="#fffdf8" />
@@ -522,7 +587,7 @@ export default function Hall({
                       {sd === (k % 2 === 0 ? -1 : 1) && (
                         <div className="absolute" style={{ [sd === -1 ? "right" : "left"]: "12%", top: "46%", width: "20%", height: "10%" }}>
                           <svg viewBox="0 0 100 40" className="h-full w-full overflow-visible" aria-hidden>
-                            <g {...G} stroke="#ff4d1c" strokeWidth={5} filter="url(#wobble-lg)" transform={sd === -1 ? "" : "translate(100 0) scale(-1 1)"}>
+                            <g {...G} stroke="#ff4d1c" strokeWidth={5} filter="url(#ink)" transform={sd === -1 ? "" : "translate(100 0) scale(-1 1)"}>
                               <path d="M4 22q40-14 86-2M70 4l22 16-20 16" />
                             </g>
                           </svg>
@@ -535,6 +600,12 @@ export default function Hall({
                     className="absolute"
                     style={{ ...planeVars, width: Wd * 0.3, height: Wd * 0.39, left: -Wd * 0.15, top: -CH, transform: `translate3d(0,0,${D / 2}px)` }}
                   >
+                    {/* lamp halo */}
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute -inset-[170%] rounded-full"
+                      style={{ background: "radial-gradient(circle, rgba(255,200,120,.45), rgba(255,200,120,.12) 40%, transparent 66%)" }}
+                    />
                     <Lamp />
                   </div>
                   {/* door */}
@@ -551,10 +622,18 @@ export default function Hall({
                     >
                       {door.title}
                     </div>
+                    {/* soft contact shadow on the floor under the door */}
                     <div
-                      className="absolute -inset-[4%] border-[5px] border-ink bg-paper-2"
-                      style={{ opacity: "var(--o)", transform: "translateZ(-2px)" }}
+                      aria-hidden
+                      className="absolute -bottom-[3%] -left-[12%] h-[7%] w-[124%]"
+                      style={{ opacity: "var(--o)", background: "radial-gradient(ellipse at 50% 50%, rgba(20,10,0,.5), transparent 70%)" }}
                     />
+                    <div
+                      className="absolute -inset-[4%] border-[5px] border-ink bg-paper-2 shadow-[0_16px_30px_rgba(20,12,4,.35)]"
+                      style={{ opacity: "var(--o)", transform: "translateZ(-2px)" }}
+                    >
+                      <div className="tex-paper absolute inset-0" />
+                    </div>
                     <div
                       className="absolute inset-0 bg-[#fffdf8]"
                       style={{
@@ -563,13 +642,19 @@ export default function Hall({
                       }}
                     />
                     <div
-                      className="absolute inset-0 border-[3px] border-ink bg-[#fffdf8] transition-transform duration-[800ms] ease-[cubic-bezier(.6,0,.2,1)]"
+                      className="absolute inset-0 border-[3px] border-ink bg-[#fffdf8] shadow-[0_0_0_1px_rgba(17,17,17,.4)] transition-transform duration-[1050ms] ease-[cubic-bezier(.55,0,.2,1.16)]"
                       style={{
                         opacity: "var(--o)",
                         transformOrigin: side === -1 ? "0% 50%" : "100% 50%",
                         transform: `translateZ(2px) rotateY(${openIdx === k ? side * 105 : 0}deg)`,
                       }}
                     >
+                      {/* heavy start, soft settle, small final bounce (the bezier overshoots 1) */}
+                      <div className="tex-wood absolute inset-0 opacity-55" />
+                      <div
+                        className="pointer-events-none absolute inset-0"
+                        style={{ background: "linear-gradient(180deg, rgba(255,214,160,.34), transparent 38%), linear-gradient(90deg, rgba(25,14,4,.16), transparent 22%)" }}
+                      />
                       <DoorPanelArt />
                       <span
                         className="absolute top-[11%] left-0 w-[86%] text-center font-display leading-none text-transparent [-webkit-text-stroke:2px_#111]"
@@ -592,6 +677,18 @@ export default function Hall({
             background:
               "radial-gradient(ellipse 12% 14% at 50% 46%, #fffdf8 0%, rgba(255,253,248,0) 100%), radial-gradient(ellipse 34% 30% at 50% 46%, rgba(255,230,205,.75) 0%, rgba(244,241,234,0) 100%)",
           }}
+          aria-hidden
+        />
+        {/* bloom at the far end, dust in the light, and a darker vignette toward the edges */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{ background: "radial-gradient(ellipse 22% 20% at 50% 46%, rgba(255,246,228,.7), rgba(255,236,205,.22) 55%, transparent 100%)" }}
+          aria-hidden
+        />
+        <Motes />
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{ background: "radial-gradient(ellipse 78% 72% at 50% 46%, transparent 52%, rgba(30,18,6,.14) 78%, rgba(30,18,6,.42) 100%)" }}
           aria-hidden
         />
 
@@ -693,7 +790,7 @@ export default function Hall({
         {/* door plate + choices */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center px-3 pb-3 sm:pb-6">
           <div
-            className={`pointer-events-auto w-full max-w-xl border-[3px] border-ink bg-paper p-3 shadow-[6px_6px_0_#111] transition-opacity duration-300 sm:p-4 ${
+            className={`tex-paper-bg pointer-events-auto w-full max-w-xl border-[3px] border-ink bg-paper p-3 shadow-[6px_6px_0_#111,0_22px_34px_rgba(20,12,4,.3)] transition-opacity duration-300 sm:p-4 ${
               ui.still ? "opacity-100" : "opacity-60"
             }`}
           >

@@ -27,7 +27,7 @@ const crateStickers = [
 ];
 
 const chip =
-  "absolute whitespace-nowrap rounded-[5px] border-2 border-ink bg-paper px-[0.5em] py-[0.12em] font-mono font-bold uppercase leading-none text-ink shadow-[1.5px_1.5px_0_#111]";
+  "absolute whitespace-nowrap rounded-[5px] border-2 border-ink bg-paper px-[0.5em] py-[0.12em] font-mono font-bold uppercase leading-none text-ink bg-[linear-gradient(135deg,rgba(255,255,255,.7),transparent_45%,rgba(0,0,0,.07))] shadow-[1.5px_1.5px_0_#111,0_3px_5px_rgba(20,12,4,.28)]";
 
 function Layer({
   depth,
