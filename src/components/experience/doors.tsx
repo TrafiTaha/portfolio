@@ -2,12 +2,20 @@ import dynamic from "next/dynamic";
 import { Award, Boxes, Github, Images, Send, User, type LucideIcon } from "lucide-react";
 import type { ComponentType } from "react";
 import About from "@/components/sections/About";
-import AboutRoom from "@/components/experience/rooms/AboutRoom";
-import CertificatesCase from "@/components/experience/rooms/CertificatesCase";
-import ContactRoom from "@/components/experience/rooms/ContactRoom";
-import { ProjectsGallery } from "@/components/experience/rooms/Gallery";
-import GithubRoom from "@/components/experience/rooms/GithubRoom";
-import SkillsTunnel from "@/components/experience/rooms/SkillsTunnel";
+
+
+
+
+
+
+
+// Rooms are code-split: each loads the first time its door opens
+const AboutRoom = dynamic(() => import("@/components/experience/rooms/AboutRoom"));
+const CertificatesCase = dynamic(() => import("@/components/experience/rooms/CertificatesCase"));
+const ContactRoom = dynamic(() => import("@/components/experience/rooms/ContactRoom"));
+const ProjectsGallery = dynamic(() => import("@/components/experience/rooms/Gallery").then((m) => m.ProjectsGallery));
+const GithubRoom = dynamic(() => import("@/components/experience/rooms/GithubRoom"));
+const SkillsTunnel = dynamic(() => import("@/components/experience/rooms/SkillsTunnel"));
 
 const Skills = dynamic(() => import("@/components/sections/Skills"));
 const Certificates = dynamic(() => import("@/components/sections/Certificates"));

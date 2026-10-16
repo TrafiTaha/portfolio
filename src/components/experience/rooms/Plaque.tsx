@@ -54,14 +54,14 @@ export default function Plaque({
         className="tex-paper-bg relative my-auto w-full max-w-2xl border-[4px] border-ink bg-paper shadow-[10px_10px_0_#ff4d1c,0_30px_50px_rgba(20,12,4,.4)]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between bg-ink px-4 py-2 text-paper">
+        <div className="sticky top-0 z-10 flex items-center justify-between bg-ink px-4 py-2 text-paper">
           <span className="font-mono text-xs font-bold tracking-[0.3em] uppercase">{kicker}</span>
           <button
             type="button"
             autoFocus
             onClick={onClose}
             aria-label="Close details"
-            className="cursor-pointer border-2 border-paper p-1 hover:bg-signal hover:text-ink"
+            className="flex h-11 w-11 cursor-pointer items-center justify-center border-2 border-paper hover:bg-signal hover:text-ink"
           >
             <X size={16} aria-hidden />
           </button>

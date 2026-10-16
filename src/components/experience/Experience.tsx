@@ -9,6 +9,8 @@ import Hero from "@/components/sections/Hero";
 import Cursor from "@/components/ui/Cursor";
 import Intro from "@/components/ui/Intro";
 import SoundToggle from "@/components/ui/SoundToggle";
+import { readQuality, setLiteQuality, subscribeQuality } from "@/lib/quality";
+import { useLite } from "@/lib/useLite";
 import { useMotionMode } from "@/lib/useMotionMode";
 
 type Mode = "hall" | "classic";
@@ -58,14 +60,23 @@ export default function Experience() {
   const entranceRef = useRef<HTMLDivElement>(null);
 
   const mode: Mode = !mounted ? "classic" : (stored ?? (reduced ? "classic" : "hall"));
+  // lite tier: phones / touch / <=4 cores / reduced motion, or measured slow frames (remembered)
+  const autoLite = useSyncExternalStore(subscribeQuality, readQuality, () => null);
+  const lite = useLite() || reduced || autoLite === "lite";
 
   // Native scroll is locked only while the hallway is mounted; always released on teardown.
   useEffect(() => {
     if (mode !== "hall") return;
-    document.documentElement.style.overflow = "hidden";
+    const root = document.documentElement;
+    root.style.overflow = "hidden";
+    // no pull-to-refresh / rubber-banding while the hallway owns the gestures
+    root.style.overscrollBehavior = "none";
+    document.body.style.overscrollBehavior = "none";
     window.__lenis?.stop();
     return () => {
-      document.documentElement.style.overflow = "";
+      root.style.overflow = "";
+      root.style.overscrollBehavior = "";
+      document.body.style.overscrollBehavior = "";
       window.__lenis?.start();
     };
   }, [mode]);
@@ -136,6 +147,8 @@ export default function Experience() {
             ref={hallRef}
             active={phase === "hall"}
             reduced={reduced}
+            lite={lite}
+            onSlow={setLiteQuality}
             onRoomChange={setRoomOpen}
             onExit={() => setPhase("entrance")}
           />
@@ -161,7 +174,8 @@ export default function Experience() {
       <button
         type="button"
         onClick={toggle}
-        className="fixed top-3 right-3 z-[120] cursor-pointer border-2 border-ink bg-paper px-3 py-2 font-mono text-[10px] font-bold tracking-wider uppercase shadow-[3px_3px_0_#111] hover:bg-signal sm:top-5 sm:right-5 sm:text-xs"
+        className="fixed top-3 right-3 z-[120] inline-flex min-h-11 cursor-pointer items-center border-2 border-ink bg-paper px-3 py-2 font-mono text-[10px] font-bold tracking-wider uppercase shadow-[3px_3px_0_#111] hover:bg-signal sm:top-5 sm:right-5 sm:text-xs"
+        style={{ marginTop: "env(safe-area-inset-top)", marginRight: "env(safe-area-inset-right)" }}
       >
         {mode === "hall" ? "Classic view" : "Walk-through view"}
       </button>

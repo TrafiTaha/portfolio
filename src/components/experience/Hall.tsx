@@ -74,12 +74,16 @@ type Geo = { D: number; HW: number; FH: number; CH: number; Hd: number; Wd: numb
 export default function Hall({
   active,
   reduced,
+  lite,
+  onSlow,
   onRoomChange,
   onExit,
   ref,
 }: {
   active: boolean;
   reduced: boolean;
+  lite: boolean;
+  onSlow: () => void;
   onRoomChange: (open: boolean) => void;
   onExit: () => void;
   ref?: Ref<HallHandle>;
@@ -93,6 +97,7 @@ export default function Hall({
   const centerMv = useMotionValue(0); // 0 = door on its wall, 1 = centred in front of the camera
   const [menu, setMenu] = useState(false);
   const sceneRef = useRef<HTMLDivElement>(null);
+  const fades = useRef<{ seg: HTMLElement[]; door: HTMLElement[]; so: number; dop: number }[]>([]);
   const bob = useRef({ t: 0, pv: 0, v: 0 });
   const vel = useRef(0);
   const segs = useRef<(HTMLDivElement | null)[]>([]);
@@ -110,6 +115,7 @@ export default function Hall({
   const rootRef = useRef<HTMLDivElement>(null);
   const openerRef = useRef<HTMLButtonElement>(null);
   const reducedRef = useRef(reduced);
+  const liteRef = useRef(lite);
 
   const geo = useMemo<Geo>(() => {
     const { w, h } = dims;
@@ -140,7 +146,7 @@ export default function Hall({
       b.t = now;
       b.pv = pv;
       const settled = Math.abs(pv - Math.round(pv)) < 0.002;
-      const amp = reducedRef.current || settled ? 0 : clamp01(Math.abs(b.v) / 2.5) * 2.6;
+      const amp = reducedRef.current || liteRef.current || settled ? 0 : clamp01(Math.abs(b.v) / 2.5) * 2.6;
       scene.style.transform = amp
         ? `translate3d(${Math.sin(pv * Math.PI * 3) * amp * 0.7}px,${Math.sin(pv * Math.PI * 6) * amp}px,0) rotate(${Math.sin(pv * Math.PI * 3) * amp * 0.03}deg)`
         : "";
@@ -152,9 +158,25 @@ export default function Hall({
       const d = mod(k - pv + 1, N) - 1; // depth in door units, range [-1, N-1)
       const far = clamp01((4.2 - d) / 1.4);
       const o = clamp01((d + 0.9) / 0.5) * far;
+      // fade targets are cached once: writing opacity straight to them avoids a custom-property cascade (style recalc) per frame
+      let cache = fades.current[k];
+      if (!cache) {
+        const all = [...seg.querySelectorAll<HTMLElement>('[style*="var(--o)"]')];
+        const inDoor = new Set(door.querySelectorAll<HTMLElement>('[style*="var(--o)"]'));
+        cache = fades.current[k] = { seg: all.filter((e) => !inDoor.has(e)), door: [...inDoor], so: -1, dop: -1 };
+      }
+      if (o < 0.01) {
+        // fully faded: hide once and skip all work for this segment
+        if (seg.style.visibility !== "hidden") seg.style.visibility = "hidden";
+        cache.so = -1;
+        continue;
+      }
+      if (seg.style.visibility !== "visible") seg.style.visibility = "visible";
       seg.style.transform = `translate3d(0,0,${-d * D}px)`;
-      seg.style.setProperty("--o", String(o));
-      seg.style.visibility = o < 0.01 ? "hidden" : "visible";
+      if (Math.abs(cache.so - o) > 0.004) {
+        cache.so = o;
+        for (const e of cache.seg) e.style.opacity = String(o);
+      }
       const side = k % 2 === 0 ? -1 : 1;
       // wall-mounted doors: flat on the wall far away, swinging toward you as they approach
       const u = d >= 0 ? ss(clamp01(d / 1.6)) : ss(clamp01(-d / 0.8));
@@ -166,19 +188,19 @@ export default function Hall({
         yaw *= 1 - c;
       }
       door.style.transform = `translate3d(${x}px,0,0) rotateY(${yaw}deg)`;
-      door.style.setProperty("--o", String(clamp01((d + 0.85) / 0.4) * far));
-      // depth of field: only distant doors soften (quantised so the filter rarely changes); near ones stay sharp
-      const blur = openRef.current === k ? 0 : Math.round(Math.min(1.6, Math.max(0, (d - 1.4) * 0.55)) * 4) / 4;
-      if (door.dataset.b !== String(blur)) {
-        door.dataset.b = String(blur);
-        door.style.filter = blur ? `blur(${blur}px)` : "";
+      const dop = clamp01((d + 0.85) / 0.4) * far;
+      if (Math.abs(cache.dop - dop) > 0.004) {
+        cache.dop = dop;
+        for (const e of cache.door) e.style.opacity = String(dop);
       }
+      // (distance softening comes from the fog/opacity fade; no per-door blur filter: it forced a re-raster per frame)
     }
   }, [centerMv]);
 
   useEffect(() => {
     reducedRef.current = reduced;
-  }, [reduced]);
+    liteRef.current = lite;
+  }, [reduced, lite]);
 
   useEffect(() => {
     geoRef.current = geo;
@@ -200,7 +222,17 @@ export default function Hall({
   }, [p, apply, centerMv]);
 
   useEffect(() => {
-    const onResize = () => setDims({ w: window.innerWidth, h: window.innerHeight });
+    // Mobile browser bars collapsing only change the height by a little: ignore that, or the whole corridor re-lays out and jumps.
+    let lw = window.innerWidth;
+    let lh = window.innerHeight;
+    const onResize = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      if (w === lw && Math.abs(h - lh) < lh * 0.25) return;
+      lw = w;
+      lh = h;
+      setDims({ w, h });
+    };
     window.addEventListener("resize", onResize);
     const list = timers.current;
     return () => {
@@ -256,7 +288,7 @@ export default function Hall({
   }, [moveTo]);
 
   const gesture = useCallback(
-    (du: number, cap = Infinity) => {
+    (du: number, cap = Infinity, touch = false) => {
       if (busy.current) return;
       if (gBase.current === null) gBase.current = Math.round(target.current);
       let t = Math.min(gBase.current + cap, Math.max(gBase.current - cap, target.current + du));
@@ -264,7 +296,8 @@ export default function Hall({
       t = Math.min(cur + 1.6, Math.max(cur - 1.6, t)); // max lead: speed is bounded
       moveTo(t);
       window.clearTimeout(idle.current);
-      idle.current = window.setTimeout(settle, 150);
+      // while a finger is down the release (touchend) decides; an idle timer would snap mid-drag and double-count
+      if (!touch) idle.current = window.setTimeout(settle, 150);
     },
     [moveTo, settle, p]
   );
@@ -305,9 +338,26 @@ export default function Hall({
         snap.current = idx;
         p.set(reducedRef.current ? idx : idx - 0.9);
         moveTo(idx);
+        // adaptive quality: average the frame time over the ~1s walk-in; slow frames drop to the lite tier for good
+        if (!liteRef.current && !reducedRef.current && !document.hidden) {
+          let lastT = 0;
+          let sum = 0;
+          let n = 0;
+          const until = performance.now() + 1100;
+          const probe = (now: number) => {
+            if (lastT) {
+              sum += now - lastT;
+              n++;
+            }
+            lastT = now;
+            if (now < until) requestAnimationFrame(probe);
+            else if (n > 12 && sum / n > 22) onSlow();
+          };
+          requestAnimationFrame(probe);
+        }
       },
     }),
-    [p, moveTo]
+    [p, moveTo, onSlow]
   );
 
   useEffect(() => {
@@ -361,18 +411,50 @@ export default function Hall({
       g.ema = g.ema * 0.8 + a * 0.2;
       gesture(px * 0.0016, 1);
     };
+    // Touch: a 10px dead zone separates taps from drags; one swipe moves at most ~1 door, and a quick flick
+    // always steps to the next door.
+    let y0 = 0;
     let ly = 0;
+    let lt = 0;
+    let vy = 0;
+    let dragging = false;
     const onTs = (e: TouchEvent) => {
-      ly = e.touches[0].clientY;
+      y0 = ly = e.touches[0].clientY;
+      window.clearTimeout(idle.current);
+      lt = performance.now();
+      vy = 0;
+      dragging = false;
     };
     const onTm = (e: TouchEvent) => {
       e.preventDefault();
       const y = e.touches[0].clientY;
-      gesture((ly - y) * 0.005, 1.5);
+      if (!dragging) {
+        if (Math.abs(y - y0) < 10) return;
+        dragging = true;
+        ly = y;
+        lt = performance.now();
+        return;
+      }
+      const now = performance.now();
+      const dt = Math.max(1, now - lt);
+      vy = vy * 0.5 + ((ly - y) / dt) * 0.5;
+      lt = now;
+      gesture((ly - y) * 0.005, 1.2, true);
       ly = y;
     };
     const onTe = () => {
-      if (!busy.current) settle();
+      if (!dragging) return;
+      dragging = false;
+      if (busy.current) return;
+      const base = gBase.current ?? Math.round(target.current);
+      if (Math.abs(vy) > 0.5 && Math.abs(target.current - base) < 1) {
+        window.clearTimeout(idle.current);
+        gBase.current = null;
+        snap.current = base + Math.sign(vy);
+        moveTo(snap.current);
+      } else {
+        settle();
+      }
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
@@ -391,15 +473,17 @@ export default function Hall({
     root.addEventListener("touchstart", onTs, { passive: true });
     root.addEventListener("touchmove", onTm, { passive: false });
     root.addEventListener("touchend", onTe, { passive: true });
+    root.addEventListener("touchcancel", onTe, { passive: true });
     window.addEventListener("keydown", onKey);
     return () => {
       window.removeEventListener("wheel", onWheel);
       root.removeEventListener("touchstart", onTs);
       root.removeEventListener("touchmove", onTm);
       root.removeEventListener("touchend", onTe);
+      root.removeEventListener("touchcancel", onTe);
       window.removeEventListener("keydown", onKey);
     };
-  }, [active, gesture, settle, step]);
+  }, [active, gesture, settle, step, moveTo]);
 
   /* ----- door -> room ----- */
   const later = useCallback((fn: () => void, ms: number) => {
@@ -465,7 +549,7 @@ export default function Hall({
         inert={!active || room !== null}
         data-lenis-prevent
         aria-hidden={!active}
-        className={`fixed inset-0 z-[55] touch-none overflow-hidden bg-paper transition-[opacity,scale] duration-700 select-none ${
+        className={`${lite ? "hall-lite" : ""} fixed inset-0 z-[55] touch-none overflow-hidden bg-paper transition-[opacity,scale] duration-700 select-none ${
           active ? "scale-100 opacity-100" : "pointer-events-none scale-[0.92] opacity-0"
         }`}
         style={{ overscrollBehavior: "none" }}
@@ -499,7 +583,7 @@ export default function Hall({
                   >
                     <div className="tex-wood absolute inset-0 opacity-60" />
                     <div
-                      className="absolute border-[3px] border-ink bg-[#fffdf8] shadow-[0_0_14px_rgba(20,12,4,.35)]"
+                      className="absolute border-[3px] border-ink bg-[#fffdf8]"
                       style={{ width: Wd * 1.7, left: `calc(50% - ${Wd * 0.85}px)`, top: "3%", height: "94%" }}
                     >
                       <div className="tex-paper absolute inset-0 opacity-80" />
@@ -528,7 +612,6 @@ export default function Hall({
                       background: "#efeade",
                     }}
                   >
-                    <div className="tex-paper absolute inset-0" />
                     <div
                       className="absolute inset-0"
                       style={{
@@ -552,8 +635,7 @@ export default function Hall({
                         background: "#ece7db",
                       }}
                     >
-                      <div className="tex-paper absolute inset-0" />
-                      <div className="hatch absolute inset-x-0 bottom-0 h-[26%] border-t-[3px] border-ink opacity-70" />
+                        <div className="hatch absolute inset-x-0 bottom-0 h-[26%] border-t-[3px] border-ink opacity-70" />
                       {/* ambient occlusion at ceiling and floor lines + lamp spill on the wall */}
                       <div
                         className="pointer-events-none absolute inset-0"
@@ -629,11 +711,10 @@ export default function Hall({
                       style={{ opacity: "var(--o)", background: "radial-gradient(ellipse at 50% 50%, rgba(20,10,0,.5), transparent 70%)" }}
                     />
                     <div
-                      className="absolute -inset-[4%] border-[5px] border-ink bg-paper-2 shadow-[0_16px_30px_rgba(20,12,4,.35)]"
+                      className="absolute -inset-[4%] border-[5px] border-ink bg-paper-2"
                       style={{ opacity: "var(--o)", transform: "translateZ(-2px)" }}
                     >
-                      <div className="tex-paper absolute inset-0" />
-                    </div>
+                      </div>
                     <div
                       className="absolute inset-0 bg-[#fffdf8]"
                       style={{
@@ -685,6 +766,8 @@ export default function Hall({
           style={{ background: "radial-gradient(ellipse 22% 20% at 50% 46%, rgba(255,246,228,.7), rgba(255,236,205,.22) 55%, transparent 100%)" }}
           aria-hidden
         />
+        {/* one screen-space paper-fibre layer instead of a textured overlay on every wall (far cheaper to composite) */}
+        <div className="tex-paper pointer-events-none absolute inset-0 opacity-70" aria-hidden />
         <Motes />
         <div
           className="pointer-events-none absolute inset-0"
@@ -693,12 +776,15 @@ export default function Hall({
         />
 
         {/* HUD */}
-        <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-3 sm:p-5">
+        <div
+          className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-3 sm:p-5"
+          style={{ marginTop: "env(safe-area-inset-top)", marginLeft: "env(safe-area-inset-left)" }}
+        >
           <div className="flex flex-col gap-2">
             <button
               type="button"
               onClick={onExit}
-              className="w-fit cursor-pointer border-2 border-ink bg-paper px-2.5 py-1 font-display text-lg leading-none tracking-wide shadow-[3px_3px_0_#111] hover:bg-signal"
+              className="flex min-h-11 min-w-11 w-fit cursor-pointer items-center justify-center border-2 border-ink bg-paper px-2.5 py-1 font-display text-lg leading-none tracking-wide shadow-[3px_3px_0_#111] hover:bg-signal"
               aria-label="Back to the entrance"
             >
               TBR<span className="text-signal">.</span>
@@ -715,7 +801,7 @@ export default function Hall({
                       onClick={() => goTo(i)}
                       aria-label={`Go to door ${i + 1}: ${d.title}`}
                       aria-current={ui.cur === i ? "true" : undefined}
-                      className="group flex h-6 w-6 cursor-pointer items-center justify-center"
+                      className="group flex h-11 w-8 cursor-pointer items-center justify-center"
                     >
                       <span
                         className={`block h-2.5 w-2.5 rounded-full border-2 border-ink transition-colors ${
@@ -728,14 +814,14 @@ export default function Hall({
               </ul>
             </div>
           </div>
-          <div className="relative mr-32 flex items-start gap-2 sm:mr-40">
+          <div className="absolute top-3 right-[7.9rem] flex items-start gap-2 sm:top-5 sm:right-[9.6rem]">
             <button
               type="button"
               onClick={() => setMenu((m) => !m)}
               aria-expanded={menu}
               aria-controls="door-menu"
               aria-label="Door menu"
-              className="cursor-pointer border-2 border-ink bg-paper p-2 shadow-[3px_3px_0_#111] hover:bg-signal"
+              className="flex h-11 w-11 cursor-pointer items-center justify-center border-2 border-ink bg-paper shadow-[3px_3px_0_#111] hover:bg-signal"
             >
               {menu ? <X size={16} aria-hidden /> : <Menu size={16} aria-hidden />}
             </button>
@@ -788,7 +874,10 @@ export default function Hall({
         </div>
 
         {/* door plate + choices */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center px-3 pb-3 sm:pb-6">
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center px-3 pb-3 sm:pb-6"
+          style={{ marginBottom: "env(safe-area-inset-bottom)" }}
+        >
           <div
             className={`tex-paper-bg pointer-events-auto w-full max-w-xl border-[3px] border-ink bg-paper p-3 shadow-[6px_6px_0_#111,0_22px_34px_rgba(20,12,4,.3)] transition-opacity duration-300 sm:p-4 ${
               ui.still ? "opacity-100" : "opacity-60"
@@ -804,14 +893,14 @@ export default function Hall({
                 ref={openerRef}
                 type="button"
                 onClick={openDoor}
-                className="inline-flex cursor-pointer items-center gap-2 border-2 border-ink bg-signal px-4 py-2 font-mono text-xs font-bold tracking-wider text-ink uppercase shadow-[3px_3px_0_#111] hover:-translate-y-0.5"
+                className="inline-flex min-h-11 cursor-pointer items-center gap-2 border-2 border-ink bg-signal px-4 py-2 font-mono text-xs font-bold tracking-wider text-ink uppercase shadow-[3px_3px_0_#111] hover:-translate-y-0.5"
               >
                 <DoorOpen size={16} aria-hidden /> Open door
               </button>
               <button
                 type="button"
                 onClick={() => step(1)}
-                className="inline-flex cursor-pointer items-center gap-2 border-2 border-ink bg-paper px-4 py-2 font-mono text-xs font-bold tracking-wider uppercase hover:bg-ink hover:text-paper"
+                className="inline-flex min-h-11 cursor-pointer items-center gap-2 border-2 border-ink bg-paper px-4 py-2 font-mono text-xs font-bold tracking-wider uppercase hover:bg-ink hover:text-paper"
               >
                 Next door <ArrowDown size={14} aria-hidden />
               </button>
@@ -819,7 +908,7 @@ export default function Hall({
                 type="button"
                 onClick={() => step(-1)}
                 aria-label="Previous door"
-                className="inline-flex cursor-pointer items-center border-2 border-ink bg-paper p-2 hover:bg-ink hover:text-paper"
+                className="inline-flex h-11 w-11 cursor-pointer items-center justify-center border-2 border-ink bg-paper hover:bg-ink hover:text-paper"
               >
                 <ArrowUp size={14} aria-hidden />
               </button>
@@ -844,7 +933,7 @@ export default function Hall({
             aria-label={`${DOORS[room].title} room`}
             data-lenis-prevent
             data-room
-            initial={{ opacity: 0, scale: 1.05 }}
+            initial={{ opacity: 0, scale: lite ? 1 : 1.05 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
@@ -858,7 +947,7 @@ export default function Hall({
                 autoFocus
                 onClick={closeRoom}
                 aria-label="Back to hallway"
-                className="pointer-events-auto absolute top-3 left-3 inline-flex cursor-pointer items-center gap-2 border-2 border-ink bg-signal px-3 py-2 font-mono text-xs font-bold tracking-wider text-ink uppercase shadow-[3px_3px_0_#111] hover:-translate-y-0.5 sm:top-5 sm:left-5"
+                className="pointer-events-auto absolute top-3 left-3 inline-flex min-h-11 cursor-pointer items-center gap-2 border-2 border-ink bg-signal px-3 py-2 font-mono text-xs font-bold tracking-wider text-ink uppercase shadow-[3px_3px_0_#111] hover:-translate-y-0.5 sm:top-5 sm:left-5"
               >
                 <ArrowLeft size={14} aria-hidden /> Back to hallway
               </button>

@@ -1,6 +1,6 @@
 // A few dozen dust motes drifting through the lamp light. Pure CSS (transform/opacity keyframes), deterministic
 // layout so server and client agree; hidden for reduced motion and paused by the browser when the tab is hidden.
-const motes = Array.from({ length: 28 }, (_, i) => {
+const motes = Array.from({ length: 12 }, (_, i) => {
   const r = (n: number) => {
     const x = Math.sin((i + 1) * 12.9898 + n * 78.233) * 43758.5453;
     return x - Math.floor(x);

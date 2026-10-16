@@ -222,7 +222,7 @@ function Rail({
         type="button"
         onClick={() => move(-S)}
         aria-label="Previous"
-        className="absolute top-1/2 left-3 z-20 cursor-pointer border-2 border-ink bg-paper p-2 shadow-[3px_3px_0_#111] hover:bg-signal"
+        className="absolute top-1/2 left-3 z-20 cursor-pointer flex h-11 w-11 items-center justify-center border-2 border-ink bg-paper shadow-[3px_3px_0_#111] hover:bg-signal"
       >
         <ArrowLeft size={18} aria-hidden />
       </button>
@@ -230,7 +230,7 @@ function Rail({
         type="button"
         onClick={() => move(S)}
         aria-label="Next"
-        className="absolute top-1/2 right-3 z-20 cursor-pointer border-2 border-ink bg-paper p-2 shadow-[3px_3px_0_#111] hover:bg-signal"
+        className="absolute top-1/2 right-3 z-20 cursor-pointer flex h-11 w-11 items-center justify-center border-2 border-ink bg-paper shadow-[3px_3px_0_#111] hover:bg-signal"
       >
         <ArrowRight size={18} aria-hidden />
       </button>

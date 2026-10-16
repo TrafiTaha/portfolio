@@ -110,7 +110,7 @@ export default function SkillsTunnel() {
               aria-hidden
               onPointerEnter={() => setName(s.name)}
               onClick={() => setName(s.name)}
-              className={`absolute -mt-[3.5rem] -ml-[3.5rem] flex h-28 w-28 cursor-pointer flex-col items-center justify-center rounded-[1.4rem] border-[3px] border-ink bg-[linear-gradient(135deg,rgba(255,255,255,.65),transparent_45%,rgba(0,0,0,.08))] shadow-[4px_4px_0_#111,0_12px_16px_rgba(20,12,4,.25)] ${
+              className={`absolute -mt-[3.5rem] -ml-[3.5rem] flex h-28 w-28 cursor-pointer flex-col items-center justify-center rounded-[1.4rem] border-[3px] border-ink bg-[linear-gradient(135deg,rgba(255,255,255,.65),transparent_45%,rgba(0,0,0,.08))] shadow-[4px_4px_0_#111] ${
                 i % 5 === 2 ? "bg-signal" : "bg-[#fffdf8]"
               }`}
               style={{ visibility: "hidden" }}

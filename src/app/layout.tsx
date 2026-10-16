@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Anton, Caveat_Brush, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import SmoothScroll from "@/components/providers/SmoothScroll";
@@ -8,6 +8,8 @@ const display = Anton({ weight: "400", variable: "--f-display", subsets: ["latin
 const hand = Caveat_Brush({ weight: "400", variable: "--f-hand", subsets: ["latin"] });
 const sans = Inter({ variable: "--f-sans", subsets: ["latin"] });
 const mono = JetBrains_Mono({ variable: "--f-mono", subsets: ["latin"] });
+
+export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover" };
 
 const title = `${personal.name} | Software Engineer — Mobile & Web`;
 const description =

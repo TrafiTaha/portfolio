@@ -6,12 +6,13 @@ import { getSound, scratch, subscribeSound, tick, toggleSound } from "@/lib/soun
 
 const INTERACTIVE = "a, button, [role='button']";
 
-// Bottom-right switch. Sound stays off until the visitor turns it on.
+// Switch for the synthesized UI sounds. Off until the visitor turns it on. Placement keeps it clear of other UI.
 const PLACE = {
-  base: "bottom-3 sm:bottom-5",
+  base: "right-3 bottom-3 sm:right-5 sm:bottom-5",
   // on phones the hallway door plate and room hint bars span the bottom, so float above them
-  hall: "bottom-[13.5rem] sm:bottom-5",
-  room: "bottom-24 sm:bottom-5",
+  hall: "right-3 bottom-[13.5rem] sm:right-5 sm:bottom-5",
+  // in rooms on phones it sits beside the Classic toggle (top row) so it never covers content
+  room: "top-3 right-[9.25rem] sm:top-auto sm:right-5 sm:bottom-5",
 } as const;
 
 export default function SoundToggle({ place = "base" }: { place?: keyof typeof PLACE }) {
@@ -44,7 +45,8 @@ export default function SoundToggle({ place = "base" }: { place?: keyof typeof P
       onClick={toggleSound}
       aria-pressed={on}
       aria-label={on ? "Turn sound off" : "Turn sound on"}
-      className={`fixed right-3 z-[120] inline-flex cursor-pointer items-center gap-2 border-2 border-ink bg-paper p-2 font-mono text-[10px] font-bold tracking-wider uppercase shadow-[3px_3px_0_#111] hover:bg-signal sm:right-5 sm:px-2.5 sm:text-xs ${PLACE[place]}`}
+      className={`fixed z-[120] inline-flex h-11 min-w-11 cursor-pointer items-center justify-center gap-2 border-2 border-ink bg-paper px-2 font-mono text-[10px] font-bold tracking-wider uppercase shadow-[3px_3px_0_#111] hover:bg-signal sm:px-2.5 sm:text-xs ${PLACE[place]}`}
+      style={place === "room" ? { marginTop: "env(safe-area-inset-top)" } : { marginBottom: "env(safe-area-inset-bottom)" }}
     >
       {on ? <Volume2 size={16} aria-hidden /> : <VolumeX size={16} aria-hidden />}
       <span className="hidden sm:inline">Sound {on ? "on" : "off"}</span>

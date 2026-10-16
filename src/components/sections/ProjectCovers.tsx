@@ -111,8 +111,8 @@ function RepoCover({ title, language, drawn }: { title: string; language: string
   const h = hash(title);
   const accent = (language && LANG_COLOR[language]) || "#ff4d1c";
   const lines = 4 + (h % 3);
-  const bars = 4 + ((h >> 3) % 3);
-  const shape = (h >> 6) % 3;
+  const bars = 4 + ((h >>> 3) % 3);
+  const shape = (h >>> 6) % 3;
   return (
     <Frame drawn={drawn} label={`Illustrated cover for ${title}`}>
       <rect x="40" y="36" width="400" height="228" fill="#fffdf8" />
@@ -121,11 +121,11 @@ function RepoCover({ title, language, drawn }: { title: string; language: string
       <circle cx="84" cy="54" r="6" />
       <circle cx="106" cy="54" r="6" />
       {Array.from({ length: lines }, (_, i) => {
-        const w = 70 + ((h >> (i + 2)) % 120);
+        const w = 70 + ((h >>> (i + 2)) % 120);
         return <path key={i} d={`M62 ${98 + i * 24}h${w}`} strokeWidth={2.6} />;
       })}
       {Array.from({ length: bars }, (_, i) => {
-        const bh = 20 + ((h >> (i * 2)) % 60);
+        const bh = 20 + ((h >>> (i * 2)) % 60);
         return <path key={`b${i}`} d={`M${290 + i * 22} 240v-${bh}`} strokeWidth={10} stroke={accent} />;
       })}
       {shape === 0 && <circle cx="360" cy="120" r="26" fill={accent} />}

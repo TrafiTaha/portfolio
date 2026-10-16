@@ -48,7 +48,7 @@ export default function Navbar() {
       initial={{ y: -60, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: [0.76, 0, 0.24, 1] }}
-      className="fixed inset-x-0 top-0 z-50 flex justify-center px-3 pt-14 sm:px-4 lg:pt-4"
+      className="fixed inset-x-0 top-0 z-50 flex justify-center px-3 pt-[4.25rem] sm:px-4 lg:pt-4"
     >
       <nav
         className="flex max-w-full items-center gap-1 rounded-full border-2 border-ink bg-paper px-2 py-1.5 shadow-[3px_3px_0_#111] sm:gap-2 sm:px-4"
