@@ -43,15 +43,21 @@ body::after {
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .1  0 0 0 0 .1  0 0 0 0 .09  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
 
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #111 #f4f1ea;
+}
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 10px;
 }
 ::-webkit-scrollbar-track {
   background: #f4f1ea;
+  border-left: 2px solid #111;
 }
 ::-webkit-scrollbar-thumb {
   background: #111;
-  border-radius: 3px;
+  border: 2px solid #f4f1ea;
+  border-radius: 0;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #ff4d1c;
@@ -60,6 +66,22 @@ body::after {
 .custom-cursor-active,
 .custom-cursor-active * {
   cursor: none !important;
+}
+
+/* Press-down: every hard-shadow sticker sinks into its shadow when clicked, like a real one.
+   Uses the `translate` property so it composes with Tailwind's hover translates. */
+:is(button, a, [role="button"])[class*="shadow-[3px_3px_0_#111]"],
+:is(button, a, [role="button"])[class*="shadow-[4px_4px_0_#111]"] {
+  transition-property: translate, box-shadow, background-color, color;
+  transition-duration: 120ms;
+}
+:is(button, a, [role="button"])[class*="shadow-[3px_3px_0_#111]"]:active {
+  translate: 3px 3px;
+  box-shadow: 0 0 0 #111;
+}
+:is(button, a, [role="button"])[class*="shadow-[4px_4px_0_#111]"]:active {
+  translate: 4px 4px;
+  box-shadow: 0 0 0 #111;
 }
 
 :focus-visible {
@@ -92,6 +114,24 @@ body::after {
 }
 .sketch.on :is(path, line, rect, circle, ellipse, polyline, polygon):not(.keep) {
   animation-play-state: running;
+}
+
+/* intro: pencil outline draws, then the ink fills in */
+@keyframes intro-stroke {
+  from {
+    stroke-dashoffset: 1500;
+  }
+}
+@keyframes intro-fill {
+  from {
+    fill-opacity: 0;
+  }
+}
+.intro-text {
+  stroke-dasharray: 1500;
+  animation:
+    intro-stroke 1.3s cubic-bezier(0.6, 0, 0.2, 1) both,
+    intro-fill 0.5s ease 1s both;
 }
 
 /* ---------- ambient motion (transform/opacity only) ---------- */

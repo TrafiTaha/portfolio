@@ -123,9 +123,19 @@ export default function Hero({
         </span>
         <span
           aria-hidden
-          className="block lg:inline text-transparent [-webkit-text-stroke:2px_#111] sm:[-webkit-text-stroke:3px_#111]"
+          className="relative block lg:inline text-transparent [-webkit-text-stroke:2px_#111] sm:[-webkit-text-stroke:3px_#111]"
         >
           Romdhane
+          {/* hand-drawn underline */}
+          <svg
+            aria-hidden
+            viewBox="0 0 600 24"
+            preserveAspectRatio="none"
+            className="sketch on pointer-events-none absolute left-0 -bottom-[0.02em] h-[0.07em] w-full overflow-visible"
+            style={{ filter: "url(#wobble)" }}
+          >
+            <path d="M4 14C80 4 140 22 220 12S380 6 460 14 560 18 596 8" fill="none" stroke="#ff4d1c" strokeWidth="9" strokeLinecap="round" />
+          </svg>
         </span>
       </h1>
 
@@ -210,6 +220,20 @@ export default function Hero({
               contact
             </span>
           </button>
+
+          {/* hand-drawn "click the door" hint */}
+          <span aria-hidden className="pointer-events-none absolute z-20 flex items-center" style={{ left: "16%", top: "79%" }}>
+            <span className="-rotate-6 font-hand leading-none whitespace-nowrap text-ink" style={{ fontSize: "max(10px, 2.4cqw)" }}>
+              click the door
+            </span>
+            <svg
+              viewBox="0 0 90 40"
+              className="sketch on ml-[0.5cqw] overflow-visible"
+              style={{ width: "8cqw", height: "3.6cqw", filter: "url(#wobble)" }}
+            >
+              <path d="M4 30C30 36 56 24 82 12M64 6l20 5-8 18" fill="none" stroke="#ff4d1c" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
 
           {/* availability stamp */}
           <span

@@ -7,13 +7,14 @@ import { DOORS } from "@/components/experience/doors";
 import Hall, { type HallHandle } from "@/components/experience/Hall";
 import Hero from "@/components/sections/Hero";
 import Cursor from "@/components/ui/Cursor";
+import Intro from "@/components/ui/Intro";
+import SoundToggle from "@/components/ui/SoundToggle";
 import { useMotionMode } from "@/lib/useMotionMode";
 
 type Mode = "hall" | "classic";
 const KEY = "tbr-view";
 const EVT = "tbr-view-change";
 const idxOf = (id: string) => DOORS.findIndex((d) => d.id === id);
-const noop = () => {};
 
 // Remembered choice (localStorage, with an in-memory fallback when storage is blocked).
 let memView: Mode | null = null;
@@ -52,6 +53,7 @@ export default function Experience() {
   const stored = useSyncExternalStore(subscribeView, readView, () => null);
   const reduced = useMotionMode() === "still";
   const [phase, setPhase] = useState<"entrance" | "hall">("entrance");
+  const [roomOpen, setRoomOpen] = useState(false);
   const hallRef = useRef<HallHandle>(null);
   const entranceRef = useRef<HTMLDivElement>(null);
 
@@ -111,6 +113,7 @@ export default function Experience() {
 
   const toggle = () => {
     setPhase("entrance");
+    setRoomOpen(false);
     window.scrollTo(0, 0);
     writeView(mode === "hall" ? "classic" : "hall");
   };
@@ -118,6 +121,8 @@ export default function Experience() {
   return (
     <>
       <Cursor />
+      <Intro />
+      <SoundToggle place={mode === "hall" && phase === "hall" ? (roomOpen ? "room" : "hall") : "base"} />
       {!mounted && <div className="boot-cover fixed inset-0 z-[300] bg-paper" aria-hidden />}
       <noscript>
         <style>{".boot-cover{display:none}"}</style>
@@ -131,7 +136,7 @@ export default function Experience() {
             ref={hallRef}
             active={phase === "hall"}
             reduced={reduced}
-            onRoomChange={noop}
+            onRoomChange={setRoomOpen}
             onExit={() => setPhase("entrance")}
           />
           <AnimatePresence>

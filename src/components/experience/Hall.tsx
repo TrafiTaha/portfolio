@@ -618,7 +618,7 @@ export default function Hall({
                       onClick={() => goTo(i)}
                       aria-label={`Go to door ${i + 1}: ${d.title}`}
                       aria-current={ui.cur === i ? "true" : undefined}
-                      className="group flex h-6 w-5 cursor-pointer items-center justify-center"
+                      className="group flex h-6 w-6 cursor-pointer items-center justify-center"
                     >
                       <span
                         className={`block h-2.5 w-2.5 rounded-full border-2 border-ink transition-colors ${

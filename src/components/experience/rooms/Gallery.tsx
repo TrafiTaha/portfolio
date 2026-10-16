@@ -198,7 +198,14 @@ function Rail({
             style={{ top: ropeY, width: PW, marginLeft: -PW / 2, visibility: "hidden" }}
           >
             <span aria-hidden className="absolute -top-2 left-1/2 z-10 h-5 w-3 -translate-x-1/2 rounded-sm border-2 border-ink bg-signal" />
-            <span className="mt-3 block border-[3px] border-ink bg-[#fffdf8] p-2 shadow-[5px_5px_0_#111] transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-[5px_5px_0_#ff4d1c] group-focus-visible:-translate-y-1">
+            <span className="relative mt-3 block border-[3px] border-ink bg-[#fffdf8] p-2 shadow-[5px_5px_0_#111] transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-[5px_5px_0_#ff4d1c] group-focus-visible:-translate-y-1">
+              {theme === "pegboard" && (
+                <>
+                  {/* washi-tape corners */}
+                  <span aria-hidden className="absolute -top-2 -left-4 z-10 h-4 w-12 -rotate-[38deg] border border-ink/30 bg-[#ffe27a]/85" />
+                  <span aria-hidden className="absolute -top-2 -right-4 z-10 h-4 w-12 rotate-[38deg] border border-ink/30 bg-signal/70" />
+                </>
+              )}
               {it.cover}
               <span className="mt-2 block font-display text-xl leading-none tracking-wide text-ink uppercase">{it.label}</span>
               <span className="block font-mono text-[10px] font-bold tracking-wider text-ink-soft uppercase">{it.sub}</span>
